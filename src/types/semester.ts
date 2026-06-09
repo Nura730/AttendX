@@ -4,10 +4,6 @@ export interface Subject {
   name: string;
 
   facultyName: string;
-
-  attendedPeriods: number;
-
-  totalPeriods: number;
 }
 
 export interface Semester {

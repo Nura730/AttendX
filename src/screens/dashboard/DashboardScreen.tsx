@@ -8,12 +8,22 @@ import {
 import { useSemesterStore }
 from "../../store/semesterStore";
 
+import { useAttendanceStore }
+from "../../store/attendanceStore";
+
+import {
+  calculateAttendance,
+} from "../../utils/attendance";
+
 export default function DashboardScreen() {
   const semester =
     useSemesterStore(
       (state) => state.semester
     );
-
+const records =
+  useAttendanceStore(
+    (state) => state.records
+  );
   if (!semester) {
     return <SetupScreen />;
   }
@@ -37,4 +47,6 @@ export default function DashboardScreen() {
       </Text>
     </View>
   );
+  
 }
+

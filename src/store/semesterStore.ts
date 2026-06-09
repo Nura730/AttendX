@@ -41,10 +41,6 @@ export const useSemesterStore = create<SemesterStore>()(
             name,
 
             facultyName,
-
-            attendedPeriods: 0,
-
-            totalPeriods: 0,
           };
 
           return {
@@ -64,9 +60,7 @@ export const useSemesterStore = create<SemesterStore>()(
     {
       name: "attendx-storage",
 
-      storage: createJSONStorage(
-  () => AsyncStorage
-),
+      storage: createJSONStorage(() => AsyncStorage),
     },
   ),
 );
