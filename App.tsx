@@ -1,5 +1,5 @@
-import DashboardScreen from "./src/screens/dashboard/DashboardScreen";
+import BottomTabs from "./src/navigation/BottomTabs";
 
 export default function App() {
-  return <DashboardScreen />;
+  return <BottomTabs />;
 }
