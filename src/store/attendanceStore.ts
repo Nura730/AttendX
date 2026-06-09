@@ -17,8 +17,11 @@ interface AttendanceStore {
 
   addAttendance: (
     subjectId: string,
+    periodNumber: number,
     status: AttendanceStatus
   ) => void;
+
+  clearAttendance: () => void;
 }
 
 export const useAttendanceStore =
@@ -29,6 +32,7 @@ export const useAttendanceStore =
 
         addAttendance: (
           subjectId,
+          periodNumber,
           status
         ) =>
           set((state) => ({
@@ -39,21 +43,29 @@ export const useAttendanceStore =
 
                 subjectId,
 
+                periodNumber,
+
                 status,
 
                 date:
-                  new Date().toISOString(),
+                  new Date()
+                    .toISOString()
+                    .split("T")[0],
               },
             ],
           })),
+
+        clearAttendance: () =>
+          set({
+            records: [],
+          }),
       }),
       {
         name: "attendance-storage",
 
-        storage:
-          createJSONStorage(
-            () => AsyncStorage
-          ),
+        storage: createJSONStorage(
+          () => AsyncStorage
+        ),
       }
     )
   );

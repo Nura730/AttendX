@@ -8,6 +8,8 @@ export interface AttendanceRecord {
 
   subjectId: string;
 
+  periodNumber: number;
+
   date: string;
 
   status: AttendanceStatus;

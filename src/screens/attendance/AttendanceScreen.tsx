@@ -32,12 +32,12 @@ export default function AttendanceScreen() {
 
           <Button
             title="Present"
-            onPress={() => addAttendance(subject.id, "present")}
+            onPress={() => addAttendance(subject.id,1, "present")}
           />
 
           <Button
             title="Absent"
-            onPress={() => addAttendance(subject.id, "absent")}
+            onPress={() => addAttendance(subject.id,1,   "absent")}
           />
         </View>
       ))}
