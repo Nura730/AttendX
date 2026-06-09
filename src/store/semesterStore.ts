@@ -1,5 +1,13 @@
 import { create } from "zustand";
-import { Semester, Subject } from "../types/semester";
+
+import { persist } from "zustand/middleware";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import {
+  Semester,
+  Subject,
+} from "../types/semester";
 
 interface SemesterStore {
   semester: Semester | null;
@@ -13,52 +21,100 @@ interface SemesterStore {
     name: string,
     facultyName: string
   ) => void;
+
+  resetSemester: () => void;
 }
 
 export const useSemesterStore =
-  create<SemesterStore>((set) => ({
-    semester: null,
+  create<SemesterStore>()(
+    persist(
+      (set) => ({
+        semester: null,
 
-    createSemester: (
-      name,
-      targetAttendance
-    ) =>
-      set({
-        semester: {
-          id: Date.now().toString(),
+        createSemester: (
           name,
-          targetAttendance,
-          subjects: [],
-        },
+          targetAttendance
+        ) =>
+          set({
+            semester: {
+              id: Date.now().toString(),
+              name,
+              targetAttendance,
+              subjects: [],
+            },
+          }),
+
+        addSubject: (
+          name,
+          facultyName
+        ) =>
+          set((state) => {
+            if (!state.semester)
+              return state;
+
+            const newSubject: Subject = {
+              id: Date.now().toString(),
+
+              name,
+
+              facultyName,
+
+              attendedPeriods: 0,
+
+              totalPeriods: 0,
+            };
+
+            return {
+              semester: {
+                ...state.semester,
+
+                subjects: [
+                  ...state.semester
+                    .subjects,
+                  newSubject,
+                ],
+              },
+            };
+          }),
+
+        resetSemester: () =>
+          set({
+            semester: null,
+          }),
       }),
+      {
+        name: "attendx-storage",
 
-    addSubject: (
-      name,
-      facultyName
-    ) =>
-      set((state) => {
-        if (!state.semester) return state;
+        storage: {
+          getItem: async (name) => {
+            const value =
+              await AsyncStorage.getItem(
+                name
+              );
 
-        const newSubject: Subject = {
-  id: Date.now().toString(),
-
-  name,
-
-  facultyName,
-
-  attendedPeriods: 0,
-
-  totalPeriods: 0,
-};
-
-        return {
-          semester: {
-            ...state.semester,
-            subjects: [
-              ...state.semester.subjects,
-              newSubject,
-            ],
+            return value
+              ? JSON.parse(value)
+              : null;
           },
-        };
-      }),
-  }));
+
+          setItem: async (
+            name,
+            value
+          ) => {
+            await AsyncStorage.setItem(
+              name,
+              JSON.stringify(value)
+            );
+          },
+
+          removeItem: async (
+            name
+          ) => {
+            await AsyncStorage.removeItem(
+              name
+            );
+          },
+        },
+      }
+    )
+  );
