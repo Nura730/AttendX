@@ -21,6 +21,10 @@ interface AttendanceStore {
     status: AttendanceStatus
   ) => void;
 
+  deleteAttendance: (
+    id: string
+  ) => void;
+
   clearAttendance: () => void;
 }
 
@@ -55,6 +59,17 @@ export const useAttendanceStore =
             ],
           })),
 
+        deleteAttendance: (
+          id
+        ) =>
+          set((state) => ({
+            records:
+              state.records.filter(
+                (record) =>
+                  record.id !== id
+              ),
+          })),
+
         clearAttendance: () =>
           set({
             records: [],
@@ -63,9 +78,10 @@ export const useAttendanceStore =
       {
         name: "attendance-storage",
 
-        storage: createJSONStorage(
-          () => AsyncStorage
-        ),
+        storage:
+          createJSONStorage(
+            () => AsyncStorage
+          ),
       }
     )
   );
