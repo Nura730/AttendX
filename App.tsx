@@ -1,15 +1,5 @@
-import { SafeAreaView, Text } from "react-native";
+import DashboardScreen from "./src/screens/dashboard/DashboardScreen";
 
 export default function App() {
-  return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>AttendX 🚀</Text>
-    </SafeAreaView>
-  );
+  return <DashboardScreen />;
 }
