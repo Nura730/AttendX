@@ -40,10 +40,16 @@ export const useSemesterStore =
         if (!state.semester) return state;
 
         const newSubject: Subject = {
-          id: Date.now().toString(),
-          name,
-          facultyName,
-        };
+  id: Date.now().toString(),
+
+  name,
+
+  facultyName,
+
+  attendedPeriods: 0,
+
+  totalPeriods: 0,
+};
 
         return {
           semester: {
