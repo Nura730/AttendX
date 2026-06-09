@@ -1,9 +1,12 @@
 export interface Subject {
   id: string;
+
   name: string;
+
   facultyName: string;
 
   attendedPeriods: number;
+
   totalPeriods: number;
 }
 
