@@ -1,8 +1,13 @@
 export const COLORS = {
-  primary: "#22C55E",
   background: "#0F172A",
   card: "#1E293B",
-  text: "#FFFFFF",
-  danger: "#EF4444",
+
+  primary: "#38BDF8",
+
+  success: "#22C55E",
   warning: "#F59E0B",
+  danger: "#EF4444",
+
+  text: "#FFFFFF",
+  secondaryText: "#94A3B8",
 };
