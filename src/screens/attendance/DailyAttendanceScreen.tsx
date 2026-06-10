@@ -9,6 +9,7 @@ import { useSemesterStore } from "../../store/semesterStore";
 import { useAttendanceStore } from "../../store/attendanceStore";
 
 import { Alert } from "react-native";
+import React from "react";
 
 export default function DailyAttendanceScreen() {
   const [periodCount, setPeriodCount] = useState("");
@@ -21,6 +22,13 @@ export default function DailyAttendanceScreen() {
 
   const addAttendance = useAttendanceStore((state) => state.addAttendance);
 
+  const clearAttendance = useAttendanceStore(
+  (state) => state.clearAttendance
+);
+
+React.useEffect(() => {
+  clearAttendance();
+}, []);
   return (
     <ScrollView
       contentContainerStyle={{
