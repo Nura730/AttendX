@@ -1,23 +1,23 @@
-import BottomTabs from "./src/navigation/BottomTabs";
+import React, { useEffect } from "react";
 import * as Notifications from "expo-notifications";
-import { useEffect } from "react";
 
-useEffect(() => {
-  async function initNotifications() {
-    const { status } = await Notifications.requestPermissionsAsync();
-
-    if (status === "granted") {
-      console.log("Notifications Enabled");
-    }
-  }
-
-  initNotifications();
-}, []);
+import BottomTabs from "./src/navigation/BottomTabs";
 
 export default function App() {
+  useEffect(() => {
+    async function initNotifications() {
+      const { status } =
+        await Notifications.requestPermissionsAsync();
+
+      if (status === "granted") {
+        console.log(
+          "Notifications Enabled"
+        );
+      }
+    }
+
+    initNotifications();
+  }, []);
+
   return <BottomTabs />;
 }
-
-
-
-

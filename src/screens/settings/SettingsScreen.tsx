@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Switch,
-  Button,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, Switch, Button, Alert } from "react-native";
 
 import * as Notifications from "expo-notifications";
 
@@ -17,58 +10,44 @@ import { calculateAttendance } from "../../utils/attendance";
 
 import { scheduleDailyReminder } from "../../services/notificationService";
 import { exportAttendancePDF } from "../../services/pdfService";
+import { exportBackup } from "../../services/backupService";
 
 export default function SettingsScreen() {
   const [enabled, setEnabled] = useState(false);
 
-  const semester = useSemesterStore(
-    (state) => state.semester
-  );
+  const semester = useSemesterStore((state) => state.semester);
 
-  const records = useAttendanceStore(
-    (state) => state.records
-  );
+  const records = useAttendanceStore((state) => state.records);
+
+  const backupData = {
+  semester,
+  records,
+};
 
   const handleExport = async () => {
     if (!semester) {
-      Alert.alert(
-        "No Semester",
-        "Please create a semester first."
-      );
+      Alert.alert("No Semester", "Please create a semester first.");
       return;
     }
 
-    const data = semester.subjects.map(
-      (subject) => {
-        const stats = calculateAttendance(
-          records,
-          subject.id
-        );
+    const data = semester.subjects.map((subject) => {
+      const stats = calculateAttendance(records, subject.id);
 
-        return {
-          name: subject.name,
-          percentage: stats.percentage,
-        };
-      }
-    );
+      return {
+        name: subject.name,
+        percentage: stats.percentage,
+      };
+    });
 
-    await exportAttendancePDF(
-      semester.name,
-      data,
-      semester.targetAttendance
-    );
+    await exportAttendancePDF(semester.name, data, semester.targetAttendance);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>
-        ⚙️ Settings
-      </Text>
+      <Text style={styles.title}>⚙️ Settings</Text>
 
       <View style={styles.card}>
-        <Text style={styles.label}>
-          Daily Attendance Reminder
-        </Text>
+        <Text style={styles.label}>Daily Attendance Reminder</Text>
 
         <Switch
           value={enabled}
@@ -85,11 +64,16 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.card}>
-        <Button
-          title="Export Attendance PDF"
-          onPress={handleExport}
-        />
+        <Button title="Export Attendance PDF" onPress={handleExport} />
       </View>
+      <View style={styles.card}>
+  <Button
+    title="Backup Data"
+    onPress={() =>
+      exportBackup(backupData)
+    }
+  />
+</View>
     </View>
   );
 }
