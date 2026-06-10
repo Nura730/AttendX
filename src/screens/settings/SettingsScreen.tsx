@@ -1,9 +1,20 @@
-import { View, Text } from "react-native";
+import { Switch } from "react-native";
+import * as Notifications from "expo-notifications";
+import { useState } from "react";
+import { scheduleDailyReminder } from "../../services/notificationService";
 
-export default function SettingsScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Settings Screen</Text>
-    </View>
-  );
-}
+const [enabled, setEnabled] =
+  useState(false);
+
+<Switch
+  value={enabled}
+  onValueChange={async (value) => {
+    setEnabled(value);
+
+    if (value) {
+      await scheduleDailyReminder();
+    } else {
+      await Notifications.cancelAllScheduledNotificationsAsync();
+    }
+  }}
+/>
