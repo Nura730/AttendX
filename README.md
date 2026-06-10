@@ -113,3 +113,14 @@ AttendX supports:
 - Daily attendance reminders
 - Low attendance alerts
 - Smart attendance warnings
+
+## PDF Reports
+
+Export attendance reports as PDF.
+
+Includes:
+
+- Semester details
+- Subject attendance
+- Overall attendance
+- Attendance insights
