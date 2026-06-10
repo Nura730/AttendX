@@ -26,6 +26,10 @@ interface AttendanceStore {
   ) => void;
 
   clearAttendance: () => void;
+
+  restoreRecords: (
+    records: AttendanceRecord[]
+  ) => void;
 }
 
 export const useAttendanceStore =
@@ -44,13 +48,9 @@ export const useAttendanceStore =
               ...state.records,
               {
                 id: Date.now().toString(),
-
                 subjectId,
-
                 periodNumber,
-
                 status,
-
                 date:
                   new Date()
                     .toISOString()
@@ -59,9 +59,12 @@ export const useAttendanceStore =
             ],
           })),
 
-        deleteAttendance: (
-          id
-        ) =>
+        restoreRecords: (records) =>
+          set({
+            records,
+          }),
+
+        deleteAttendance: (id) =>
           set((state) => ({
             records:
               state.records.filter(

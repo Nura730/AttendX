@@ -14,7 +14,15 @@ interface SemesterStore {
   addSubject: (name: string, facultyName: string) => void;
 
   resetSemester: () => void;
+
+  restoreSemester: (semester: Semester) => void;
 }
+
+const restoreRecords =
+  useAttendanceStore(
+    (state) =>
+      state.restoreRecords
+  );
 
 export const useSemesterStore = create<SemesterStore>()(
   persist(
@@ -30,6 +38,8 @@ export const useSemesterStore = create<SemesterStore>()(
             subjects: [],
           },
         }),
+
+      restoreSemester: (semester) => set({ semester }),
 
       addSubject: (name, facultyName) =>
         set((state) => {
