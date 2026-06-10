@@ -1,38 +1,20 @@
-import {
-  ScrollView,
-  Text,
-  View,
-  Button,
-} from "react-native";
+import { ScrollView, Text, View, Button } from "react-native";
 
 import { useAttendanceStore } from "../../store/attendanceStore";
 import { useSemesterStore } from "../../store/semesterStore";
 
 export default function AttendanceHistoryScreen() {
-  const records =
-    useAttendanceStore(
-      (state) => state.records
-    );
+  const records = useAttendanceStore((state) => state.records);
 
-  const deleteAttendance =
-    useAttendanceStore(
-      (state) =>
-        state.deleteAttendance
-    );
+  const deleteAttendance = useAttendanceStore(
+    (state) => state.deleteAttendance,
+  );
 
-  const semester =
-    useSemesterStore(
-      (state) => state.semester
-    );
+  const semester = useSemesterStore((state) => state.semester);
 
-  const getSubjectName = (
-    subjectId: string
-  ) => {
+  const getSubjectName = (subjectId: string) => {
     return (
-      semester?.subjects.find(
-        (s) =>
-          s.id === subjectId
-      )?.name || "Unknown"
+      semester?.subjects.find((s) => s.id === subjectId)?.name || "Unknown"
     );
   };
 
@@ -52,12 +34,7 @@ export default function AttendanceHistoryScreen() {
         Attendance History
       </Text>
 
-      {records.length === 0 && (
-        <Text>
-          No attendance records
-          found.
-        </Text>
-      )}
+      {records.length === 0 && <Text>No attendance records found.</Text>}
 
       {records.map((record) => (
         <View
@@ -69,29 +46,13 @@ export default function AttendanceHistoryScreen() {
             marginBottom: 10,
           }}
         >
-          <Text>
-            Date: {record.date}
-          </Text>
+          <Text>Date: {record.date}</Text>
 
-          <Text>
-            Period:
-            {" "}
-            {record.periodNumber}
-          </Text>
+          <Text>Period: {record.periodNumber}</Text>
 
-          <Text>
-            Subject:
-            {" "}
-            {getSubjectName(
-              record.subjectId
-            )}
-          </Text>
+          <Text>Subject: {getSubjectName(record.subjectId)}</Text>
 
-          <Text>
-            Status:
-            {" "}
-            {record.status}
-          </Text>
+          <Text>Status: {record.status}</Text>
 
           <View
             style={{
@@ -101,11 +62,7 @@ export default function AttendanceHistoryScreen() {
             <Button
               title="Delete"
               color="red"
-              onPress={() =>
-                deleteAttendance(
-                  record.id
-                )
-              }
+              onPress={() => deleteAttendance(record.id)}
             />
           </View>
         </View>

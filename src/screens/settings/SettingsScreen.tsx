@@ -12,50 +12,33 @@ import { scheduleDailyReminder } from "../../services/notificationService";
 import { exportAttendancePDF } from "../../services/pdfService";
 
 import { exportBackup, importBackup } from "../../services/backupService";
+import { useArchiveStore } from "../../store/archiveStore";
 
 export default function SettingsScreen() {
+  const addArchive = useArchiveStore((state) => state.addArchive);
 
-  const addArchive =
-  useArchiveStore(
-    (state) =>
-      state.addArchive
-  );
+  const handleArchive = () => {
+    if (!semester) return;
 
-const handleArchive = () => {
-  if (!semester) return;
+    const totalPresent = records.filter((r) => r.status === "present").length;
 
-  const totalPresent =
-    records.filter(
-      (r) =>
-        r.status === "PRESENT"
-    ).length;
+    const attendance =
+      records.length === 0 ? 0 : (totalPresent / records.length) * 100;
 
-  const attendance =
-    records.length === 0
-      ? 0
-      : (totalPresent /
-          records.length) *
-        100;
+    addArchive({
+      id: Date.now().toString(),
 
-  addArchive({
-    id: Date.now().toString(),
+      name: semester.name,
 
-    name: semester.name,
+      completedAt: new Date().toLocaleDateString(),
 
-    completedAt:
-      new Date().toLocaleDateString(),
+      attendance,
 
-    attendance,
+      subjectCount: semester.subjects.length,
+    });
 
-    subjectCount:
-      semester.subjects.length,
-  });
-
-  Alert.alert(
-    "Archived",
-    "Semester saved."
-  );
-};
+    Alert.alert("Archived", "Semester saved.");
+  };
 
   const [enabled, setEnabled] = useState(false);
 
@@ -142,11 +125,8 @@ const handleArchive = () => {
       </View>
 
       <View style={styles.card}>
-        <Button
-  title="Archive Semester"
-  onPress={handleArchive}
-/>
-</View>
+        <Button title="Archive Semester" onPress={handleArchive} />
+      </View>
     </View>
   );
 }

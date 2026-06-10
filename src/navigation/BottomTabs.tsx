@@ -8,6 +8,7 @@ import AnalyticsScreen from "../screens/analytics/AnalyticsScreen";
 import GpaScreen from "../screens/gpa/GpaScreen";
 import SettingsScreen from "../screens/settings/SettingsScreen";
 import ArchiveScreen from "../screens/archive/ArchiveScreen";
+import CalendarScreen from "../screens/calendar/CalendarScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -44,10 +45,13 @@ export default function BottomTabs() {
               case "GPA":
                 iconName = "school";
                 break;
-              
-                case "Archive":
-  iconName = "archive";
-  break;
+
+              case "Archive":
+                iconName = "archive";
+                break;
+              case "Calendar":
+                iconName = "calendar-outline";
+                break;
 
               default:
                 iconName = "settings";
@@ -63,12 +67,9 @@ export default function BottomTabs() {
         <Tab.Screen name="Attendance" component={AttendanceScreen} />
         <Tab.Screen name="Analytics" component={AnalyticsScreen} />
         <Tab.Screen name="GPA" component={GpaScreen} />
-        <Tab.Screen
-  name="Archive"
-  component={ArchiveScreen}
-/>
+        <Tab.Screen name="Archive" component={ArchiveScreen} />
+        <Tab.Screen name="Calendar" component={CalendarScreen} />
         <Tab.Screen name="Settings" component={SettingsScreen} />
-
       </Tab.Navigator>
     </NavigationContainer>
   );
