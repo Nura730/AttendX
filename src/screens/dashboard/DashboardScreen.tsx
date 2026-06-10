@@ -6,7 +6,7 @@ import {
 } from "react-native";
 
 import { useSemesterStore } from "../../store/semesterStore";
-import { useAttendanceStore } from "../../store/attendanceStore";
+
 
 import {
   calculateAttendance,
@@ -19,10 +19,7 @@ export default function DashboardScreen() {
     (state) => state.semester
   );
 
-  const records = useAttendanceStore(
-    (state) => state.records
-  );
-
+ const records: any[] = [];
   if (!semester) {
     return null;
   }

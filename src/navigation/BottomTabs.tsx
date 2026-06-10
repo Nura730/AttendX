@@ -7,6 +7,7 @@ import AttendanceScreen from "../screens/attendance/AttendanceScreen";
 import AnalyticsScreen from "../screens/analytics/AnalyticsScreen";
 import GpaScreen from "../screens/gpa/GpaScreen";
 import SettingsScreen from "../screens/settings/SettingsScreen";
+import ArchiveScreen from "../screens/archive/ArchiveScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -16,14 +17,14 @@ export default function BottomTabs() {
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarStyle: {
-  height: 65,
-  paddingBottom: 8,
-  backgroundColor: "#0F172A",
-},
+            height: 65,
+            paddingBottom: 8,
+            backgroundColor: "#0F172A",
+          },
 
-tabBarActiveTintColor: "#38BDF8",
+          tabBarActiveTintColor: "#38BDF8",
 
-tabBarInactiveTintColor: "#94A3B8",
+          tabBarInactiveTintColor: "#94A3B8",
           tabBarIcon: ({ color, size }) => {
             let iconName: any;
 
@@ -43,47 +44,31 @@ tabBarInactiveTintColor: "#94A3B8",
               case "GPA":
                 iconName = "school";
                 break;
+              
+                case "Archive":
+  iconName = "archive";
+  break;
 
               default:
                 iconName = "settings";
             }
 
-            return (
-              <Ionicons
-                name={iconName}
-                size={size}
-                color={color}
-              />
-            );
+            return <Ionicons name={iconName} size={size} color={color} />;
           },
 
           headerShown: false,
         })}
       >
+        <Tab.Screen name="Dashboard" component={DashboardScreen} />
+        <Tab.Screen name="Attendance" component={AttendanceScreen} />
+        <Tab.Screen name="Analytics" component={AnalyticsScreen} />
+        <Tab.Screen name="GPA" component={GpaScreen} />
         <Tab.Screen
-          name="Dashboard"
-          component={DashboardScreen}
-        />
+  name="Archive"
+  component={ArchiveScreen}
+/>
+        <Tab.Screen name="Settings" component={SettingsScreen} />
 
-        <Tab.Screen
-          name="Attendance"
-          component={AttendanceScreen}
-        />
-
-        <Tab.Screen
-          name="Analytics"
-          component={AnalyticsScreen}
-        />
-
-        <Tab.Screen
-          name="GPA"
-          component={GpaScreen}
-        />
-
-        <Tab.Screen
-          name="Settings"
-          component={SettingsScreen}
-        />
       </Tab.Navigator>
     </NavigationContainer>
   );

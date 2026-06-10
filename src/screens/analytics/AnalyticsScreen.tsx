@@ -10,7 +10,7 @@ import {
 import { BarChart } from "react-native-chart-kit";
 
 import { useSemesterStore } from "../../store/semesterStore";
-import { useAttendanceStore } from "../../store/attendanceStore";
+
 
 import { calculateAttendance } from "../../utils/attendance";
 
@@ -21,9 +21,7 @@ export default function AnalyticsScreen() {
     (state) => state.semester
   );
 
-  const records = useAttendanceStore(
-    (state) => state.records
-  );
+  const records: any[] = [];
 
   if (!semester) {
     return null;
@@ -119,10 +117,11 @@ export default function AnalyticsScreen() {
         </Text>
 
         <BarChart
-          data={chartData}
-          width={screenWidth - 60}
-          height={220}
-          yAxisSuffix="%"
+  data={chartData}
+  width={screenWidth - 60}
+  height={220}
+  yAxisLabel=""
+  yAxisSuffix="%"
           fromZero
           chartConfig={{
             backgroundGradientFrom:

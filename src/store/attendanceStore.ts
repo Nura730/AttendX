@@ -1,10 +1,8 @@
 import { create } from "zustand";
-
 import {
   persist,
   createJSONStorage,
 } from "zustand/middleware";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
@@ -21,9 +19,7 @@ interface AttendanceStore {
     status: AttendanceStatus
   ) => void;
 
-  deleteAttendance: (
-    id: string
-  ) => void;
+  deleteAttendance: (id: string) => void;
 
   clearAttendance: () => void;
 
@@ -80,7 +76,6 @@ export const useAttendanceStore =
       }),
       {
         name: "attendance-storage",
-
         storage:
           createJSONStorage(
             () => AsyncStorage
