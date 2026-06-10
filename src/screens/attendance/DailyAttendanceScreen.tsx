@@ -8,6 +8,8 @@ import { useSemesterStore } from "../../store/semesterStore";
 
 import { useAttendanceStore } from "../../store/attendanceStore";
 
+import { Alert } from "react-native";
+
 export default function DailyAttendanceScreen() {
   const [periodCount, setPeriodCount] = useState("");
 
@@ -134,7 +136,10 @@ export default function DailyAttendanceScreen() {
             addAttendance(entry.subjectId, entry.periodNumber, entry.status);
           });
 
-          alert("Attendance Saved");
+          Alert.alert(
+  "Success",
+  "Attendance saved successfully."
+);
 
           setPeriods([]);
           setDailyEntries([]);
