@@ -6,55 +6,55 @@ Smart Attendance & GPA Tracker built with React Native and Expo.
 
 ### 📚 Attendance Management
 
-* Add subjects
-* Mark attendance
-* Attendance history
-* Attendance percentage calculation
-* Safe/Danger status
-* Bunk calculator
+- Add subjects
+- Mark attendance
+- Attendance history
+- Attendance percentage calculation
+- Safe/Danger status
+- Bunk calculator
 
 ### 📊 Analytics Dashboard
 
-* Overall attendance tracking
-* Subject comparison charts
-* Attendance insights
-* Attendance prediction
-* Attendance streak tracking
+- Overall attendance tracking
+- Subject comparison charts
+- Attendance insights
+- Attendance prediction
+- Attendance streak tracking
 
 ### 🎓 GPA Calculator
 
-* SGPA calculation
-* Credit-based grading
-* Grade point conversion
-* GPA prediction
+- SGPA calculation
+- Credit-based grading
+- Grade point conversion
+- GPA prediction
 
 ### ⚙️ Settings
 
-* Attendance target management
-* Data management
-* App preferences
+- Attendance target management
+- Data management
+- App preferences
 
 ## Tech Stack
 
 ### Frontend
 
-* React Native
-* Expo
-* TypeScript
+- React Native
+- Expo
+- TypeScript
 
 ### State Management
 
-* Zustand
-* AsyncStorage
+- Zustand
+- AsyncStorage
 
 ### Navigation
 
-* React Navigation
+- React Navigation
 
 ### Charts
 
-* react-native-chart-kit
-* react-native-svg
+- react-native-chart-kit
+- react-native-svg
 
 ## Installation
 
@@ -89,19 +89,27 @@ src
 
 ### Completed
 
-* Attendance Tracking
-* Dashboard
-* Analytics
-* GPA Module
+- Attendance Tracking
+- Dashboard
+- Analytics
+- GPA Module
 
 ### Upcoming
 
-* Notifications
-* PDF Export
-* Backup & Restore
-* Semester Archive
-* AI Insights
+- Notifications
+- PDF Export
+- Backup & Restore
+- Semester Archive
+- AI Insights
 
 ## License
 
 MIT License
+
+## Notifications
+
+AttendX supports:
+
+- Daily attendance reminders
+- Low attendance alerts
+- Smart attendance warnings
