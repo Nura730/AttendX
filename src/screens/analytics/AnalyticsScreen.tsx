@@ -11,6 +11,7 @@ import { BarChart } from "react-native-chart-kit";
 
 import { useSemesterStore } from "../../store/semesterStore";
 
+import { useAttendanceStore } from "../../store/attendanceStore";
 
 import { calculateAttendance } from "../../utils/attendance";
 
@@ -21,7 +22,11 @@ export default function AnalyticsScreen() {
     (state) => state.semester
   );
 
-  const records: any[] = [];
+const records = useAttendanceStore(
+  (state) => state.records
+);
+
+console.log("Analytics Records:", records);
 
   if (!semester) {
     return null;

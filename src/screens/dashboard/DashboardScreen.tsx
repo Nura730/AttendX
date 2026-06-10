@@ -1,12 +1,6 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-} from "react-native";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
 
 import { useSemesterStore } from "../../store/semesterStore";
-
 
 import {
   calculateAttendance,
@@ -14,47 +8,34 @@ import {
   classesNeededToReachTarget,
 } from "../../utils/attendance";
 
+import { useAttendanceStore } from "../../store/attendanceStore";
+
 export default function DashboardScreen() {
-  const semester = useSemesterStore(
-    (state) => state.semester
-  );
+  const semester = useSemesterStore((state) => state.semester);
 
- const records: any[] = [];
-  if (!semester) {
-    return null;
-  }
+  const records = useAttendanceStore((state) => state.records);
 
-  const totalPresent = records.filter(
-    (r) => r.status === "PRESENT"
-  ).length;
+  console.log("Dashboard Records:", records);
+
+  const totalPresent = records.filter((r) => r.status === "PRESENT").length;
 
   const totalClasses = records.length;
 
   const overallAttendance =
-    totalClasses === 0
-      ? 0
-      : (totalPresent / totalClasses) * 100;
+    totalClasses === 0 ? 0 : (totalPresent / totalClasses) * 100;
 
-  const subjectStats = semester.subjects.map(
-    (subject) => ({
+  const subjectStats =
+    semester?.subjects.map((subject) => ({
       subject,
-      stats: calculateAttendance(
-        records,
-        subject.id
-      ),
-    })
-  );
+      stats: calculateAttendance(records, subject.id),
+    })) || [];
 
   const bestSubject = [...subjectStats].sort(
-    (a, b) =>
-      b.stats.percentage -
-      a.stats.percentage
+    (a, b) => b.stats.percentage - a.stats.percentage,
   )[0];
 
   const dangerSubjects = subjectStats.filter(
-    (s) =>
-      s.stats.percentage <
-      semester.targetAttendance
+    (s) => s.stats.percentage < (semester?.targetAttendance ?? 0),
   );
 
   return (
@@ -63,19 +44,14 @@ export default function DashboardScreen() {
         padding: 20,
       }}
     >
-      <Text style={styles.title}>
-        {semester.name}
-      </Text>
+      <Text style={styles.title}>{semester?.name}</Text>
 
       <Text style={styles.target}>
-        Target Attendance:{" "}
-        {semester.targetAttendance}%
+        Target Attendance: {semester?.targetAttendance}%
       </Text>
 
       <View style={styles.heroCard}>
-        <Text style={styles.heroTitle}>
-          Overall Attendance
-        </Text>
+        <Text style={styles.heroTitle}>Overall Attendance</Text>
 
         <Text style={styles.heroPercentage}>
           {overallAttendance.toFixed(1)}%
@@ -83,129 +59,82 @@ export default function DashboardScreen() {
       </View>
 
       <Text style={styles.subjectCount}>
-        Subjects: {semester.subjects.length}
+        Subjects: {semester?.subjects.length}
       </Text>
 
       {bestSubject && (
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>
-            🏆 Best Subject
-          </Text>
+          <Text style={styles.cardTitle}>🏆 Best Subject</Text>
 
-          <Text>
-            {bestSubject.subject.name}
-          </Text>
+          <Text>{bestSubject.subject.name}</Text>
 
-          <Text>
-            {bestSubject.stats.percentage.toFixed(
-              1
-            )}
-            %
-          </Text>
+          <Text>{bestSubject.stats.percentage.toFixed(1)}%</Text>
         </View>
       )}
 
       {dangerSubjects.length > 0 && (
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>
-            ⚠️ Attention Required
-          </Text>
+          <Text style={styles.cardTitle}>⚠️ Attention Required</Text>
 
           {dangerSubjects.map((item) => (
             <Text key={item.subject.id}>
-              {item.subject.name} -{" "}
-              {item.stats.percentage.toFixed(
-                1
-              )}
-              %
+              {item.subject.name} - {item.stats.percentage.toFixed(1)}%
             </Text>
           ))}
         </View>
       )}
 
-      {semester.subjects.map((subject) => {
-        const stats =
-          calculateAttendance(
-            records,
-            subject.id
-          );
+      {semester?.subjects.map((subject) => {
+        const stats = calculateAttendance(records, subject.id);
 
         const canMiss = canMissClasses(
           stats.attended,
           stats.total,
-          semester.targetAttendance
+          semester?.targetAttendance ?? 0,
         );
 
-        const needed =
-          classesNeededToReachTarget(
-            stats.attended,
-            stats.total,
-            semester.targetAttendance
-          );
+        const needed = classesNeededToReachTarget(
+          stats.attended,
+          stats.total,
+          semester?.targetAttendance ?? 0,
+        );
 
-        const isSafe =
-          stats.percentage >=
-          semester.targetAttendance;
+        const isSafe = stats.percentage >= semester.targetAttendance;
 
         return (
-          <View
-            key={subject.id}
-            style={styles.subjectCard}
-          >
-            <Text style={styles.subjectName}>
-              {subject.name}
-            </Text>
+          <View key={subject.id} style={styles.subjectCard}>
+            <Text style={styles.subjectName}>{subject.name}</Text>
 
             <View style={styles.progressBg}>
               <View
                 style={[
                   styles.progressFill,
                   {
-                    width: `${Math.min(
-                      stats.percentage,
-                      100
-                    )}%`,
-                    backgroundColor: isSafe
-                      ? "#22C55E"
-                      : "#EF4444",
+                    width: `${Math.min(stats.percentage, 100)}%`,
+                    backgroundColor: isSafe ? "#22C55E" : "#EF4444",
                   },
                 ]}
               />
             </View>
 
-            <Text>
-              Attendance:{" "}
-              {stats.percentage.toFixed(1)}%
-            </Text>
+            <Text>Attendance: {stats.percentage.toFixed(1)}%</Text>
 
-            <Text>
-              Present: {stats.attended}
-            </Text>
+            <Text>Present: {stats.attended}</Text>
 
-            <Text>
-              Total Classes: {stats.total}
-            </Text>
+            <Text>Total Classes: {stats.total}</Text>
 
-            <Text>
-              Can Miss: {canMiss}
-            </Text>
+            <Text>Can Miss: {canMiss}</Text>
 
-            <Text>
-              Need To Attend: {needed}
-            </Text>
+            <Text>Need To Attend: {needed}</Text>
 
             <Text
               style={{
                 marginTop: 5,
-                color: isSafe
-                  ? "green"
-                  : "red",
+                color: isSafe ? "green" : "red",
                 fontWeight: "bold",
               }}
             >
-              {isSafe
-                ? "SAFE ✅"
-                : "DANGER ⚠️"}
+              {isSafe ? "SAFE ✅" : "DANGER ⚠️"}
             </Text>
           </View>
         );

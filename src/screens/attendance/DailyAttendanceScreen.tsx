@@ -52,7 +52,7 @@ export default function DailyAttendanceScreen() {
 
                   subjectId: semester?.subjects[0]?.id || "",
 
-                  status: "present",
+                  status: "PRESENT",
                 }),
               );
 
@@ -108,11 +108,20 @@ export default function DailyAttendanceScreen() {
                   setDailyEntries(updated);
                 }}
               >
-                <Picker.Item label="Present" value="present" />
+                <Picker.Item
+  label="Present"
+  value="PRESENT"
+/>
 
-                <Picker.Item label="Absent" value="absent" />
+<Picker.Item
+  label="Absent"
+  value="ABSENT"
+/>
 
-                <Picker.Item label="Cancelled" value="cancelled" />
+<Picker.Item
+  label="Cancelled"
+  value="CANCELLED"
+/>
               </Picker>
             </View>
           ))}
@@ -125,24 +134,11 @@ export default function DailyAttendanceScreen() {
             addAttendance(entry.subjectId, entry.periodNumber, entry.status);
           });
 
-          <Button
-  title="Save Day"
-  onPress={() => {
-    dailyEntries.forEach(
-      (entry) => {
-        addAttendance(
-          entry.subjectId,
-          entry.periodNumber,
-          entry.status
-        );
-      }
-    );
+          alert("Attendance Saved");
 
-    alert(
-      "Attendance Saved"
-    );
-  }}
-/>
+          setPeriods([]);
+          setDailyEntries([]);
+          setPeriodCount("");
         }}
       />
     </ScrollView>

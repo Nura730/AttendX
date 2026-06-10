@@ -1,7 +1,7 @@
 export type AttendanceStatus =
-  | "present"
-  | "absent"
-  | "cancelled";
+  | "PRESENT"
+  | "ABSENT"
+  | "CANCELLED";
 
 export interface AttendanceRecord {
   id: string;

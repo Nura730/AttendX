@@ -1,14 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Switch, Button, Alert } from "react-native";
 
-import * as Notifications from "expo-notifications";
-
 import { useSemesterStore } from "../../store/semesterStore";
 import { useAttendanceStore } from "../../store/attendanceStore";
 
 import { calculateAttendance } from "../../utils/attendance";
-
-import { scheduleDailyReminder } from "../../services/notificationService";
 import { exportAttendancePDF } from "../../services/pdfService";
 
 import { exportBackup, importBackup } from "../../services/backupService";
@@ -20,7 +16,7 @@ export default function SettingsScreen() {
   const handleArchive = () => {
     if (!semester) return;
 
-    const totalPresent = records.filter((r) => r.status === "present").length;
+    const totalPresent = records.filter((r) => r.status === "PRESENT").length;
 
     const attendance =
       records.length === 0 ? 0 : (totalPresent / records.length) * 100;
@@ -104,9 +100,7 @@ export default function SettingsScreen() {
             setEnabled(value);
 
             if (value) {
-              await scheduleDailyReminder();
-            } else {
-              await Notifications.cancelAllScheduledNotificationsAsync();
+              console.log("Notifications disabled in Expo Go");
             }
           }}
         />
