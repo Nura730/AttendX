@@ -1,12 +1,17 @@
 import {
+  FlatList,
   View,
   Text,
-  FlatList,
+  Button,
 } from "react-native";
 
 import { useAttendanceStore } from "../../store/attendanceStore";
 
 export default function AttendanceHistoryScreen() {
+  const deleteAttendance =
+  useAttendanceStore(
+    (state) => state.deleteAttendance
+  );
   const records = useAttendanceStore(
     (state) => state.records
   );
@@ -14,7 +19,9 @@ export default function AttendanceHistoryScreen() {
   return (
     <FlatList
       data={[...records].reverse()}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item, index) =>
+  `${item.id}-${index}`
+}
       renderItem={({ item }) => (
         <View
           style={{
@@ -24,9 +31,7 @@ export default function AttendanceHistoryScreen() {
             borderRadius: 10,
           }}
         >
-          <Text>
-            Date: {item.date}
-          </Text>
+          <Text>Date: {item.date}</Text>
 
           <Text>
             Period: {item.periodNumber}
@@ -35,6 +40,14 @@ export default function AttendanceHistoryScreen() {
           <Text>
             Status: {item.status}
           </Text>
+
+          <Button
+  title="Delete"
+  color="red"
+  onPress={() =>
+    deleteAttendance(item.id)
+  }
+/>
         </View>
       )}
     />

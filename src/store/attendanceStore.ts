@@ -1,14 +1,8 @@
 import { create } from "zustand";
-import {
-  persist,
-  createJSONStorage,
-} from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import {
-  AttendanceRecord,
-  AttendanceStatus,
-} from "../types/attendance";
+import { AttendanceRecord, AttendanceStatus } from "../types/attendance";
 
 interface AttendanceStore {
   records: AttendanceRecord[];
@@ -16,70 +10,53 @@ interface AttendanceStore {
   addAttendance: (
     subjectId: string,
     periodNumber: number,
-    status: AttendanceStatus
+    status: AttendanceStatus,
   ) => void;
 
   deleteAttendance: (id: string) => void;
 
   clearAttendance: () => void;
 
-  restoreRecords: (
-    records: AttendanceRecord[]
-  ) => void;
+  restoreRecords: (records: AttendanceRecord[]) => void;
 }
 
-export const useAttendanceStore =
-  create<AttendanceStore>()(
-    persist(
-      (set) => ({
-        records: [],
+export const useAttendanceStore = create<AttendanceStore>()(
+  persist(
+    (set) => ({
+      records: [],
 
-        addAttendance: (
-          subjectId,
-          periodNumber,
-          status
-        ) =>
-          set((state) => ({
-            records: [
-              ...state.records,
-              {
-                id: Date.now().toString(),
-                subjectId,
-                periodNumber,
-                status,
-                date:
-                  new Date()
-                    .toISOString()
-                    .split("T")[0],
-              },
-            ],
-          })),
+      addAttendance: (subjectId, periodNumber, status) =>
+        set((state) => ({
+          records: [
+            ...state.records,
+            {
+              id: `${Date.now()}-${periodNumber}-${subjectId}`,
+              subjectId,
+              periodNumber,
+              status,
+              date: new Date().toISOString().split("T")[0],
+            },
+          ],
+        })),
 
-        restoreRecords: (records) =>
-          set({
-            records,
-          }),
+      restoreRecords: (records) =>
+        set({
+          records,
+        }),
 
-        deleteAttendance: (id) =>
-          set((state) => ({
-            records:
-              state.records.filter(
-                (record) =>
-                  record.id !== id
-              ),
-          })),
+      deleteAttendance: (id) =>
+        set((state) => ({
+          records: state.records.filter((record) => record.id !== id),
+        })),
 
-        clearAttendance: () =>
-          set({
-            records: [],
-          }),
-      }),
-      {
-        name: "attendance-storage",
-        storage:
-          createJSONStorage(
-            () => AsyncStorage
-          ),
-      }
-    )
-  );
+      clearAttendance: () =>
+        set({
+          records: [],
+        }),
+    }),
+    {
+      name: "attendance-storage-v2",
+      storage: createJSONStorage(() => AsyncStorage),
+    },
+  ),
+);
