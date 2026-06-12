@@ -19,6 +19,10 @@ export default function DashboardScreen() {
 
   const totalPresent = records.filter((r) => r.status === "PRESENT").length;
 
+  const totalAbsent = records.filter(
+  (r) => r.status === "ABSENT"
+).length;
+
   const totalClasses = records.length;
 
   const overallAttendance =
@@ -38,6 +42,27 @@ export default function DashboardScreen() {
     (s) => s.stats.percentage < (semester?.targetAttendance ?? 0),
   );
 
+  const worstSubject = [...subjectStats].sort(
+  (a, b) => a.stats.percentage - b.stats.percentage,
+)[0];
+
+const predictorNeeded = worstSubject
+  ? classesNeededToReachTarget(
+      worstSubject.stats.attended,
+      worstSubject.stats.total,
+      semester?.targetAttendance ?? 75,
+    )
+  : 0;
+
+
+  const predictorMiss = worstSubject
+  ? canMissClasses(
+      worstSubject.stats.attended,
+      worstSubject.stats.total,
+      semester?.targetAttendance ?? 75,
+    )
+  : 0;
+
   return (
     <ScrollView
       contentContainerStyle={{
@@ -51,6 +76,67 @@ export default function DashboardScreen() {
       </Text>
 
       <View style={styles.heroCard}>
+        
+        <View style={styles.predictorCard}>
+  <Text style={styles.cardTitle}>
+    🎯 Attendance Predictor
+  </Text>
+
+  {worstSubject && (
+    <>
+      <Text>
+        Subject: {worstSubject.subject.name}
+      </Text>
+
+      <Text>
+        Current:
+        {" "}
+        {worstSubject.stats.percentage.toFixed(1)}%
+      </Text>
+
+      <Text>
+        Need To Attend:
+        {" "}
+        {predictorNeeded}
+      </Text>
+
+      <Text>
+        Can Miss:
+        {" "}
+        {predictorMiss}
+      </Text>
+    </>
+  )}
+</View>
+<View style={styles.statsRow}>
+  <View style={styles.statBox}>
+    <Text style={styles.statNumber}>
+      {semester?.subjects.length ?? 0}
+    </Text>
+    <Text>Subjects</Text>
+  </View>
+
+  <View style={styles.statBox}>
+    <Text style={styles.statNumber}>
+      {totalClasses}
+    </Text>
+    <Text>Classes</Text>
+  </View>
+
+  <View style={styles.statBox}>
+    <Text style={styles.statNumber}>
+      {totalPresent}
+    </Text>
+    <Text>Present</Text>
+  </View>
+
+  <View style={styles.statBox}>
+    <Text style={styles.statNumber}>
+      {totalAbsent}
+    </Text>
+    <Text>Absent</Text>
+  </View>
+</View>
         <Text style={styles.heroTitle}>Overall Attendance</Text>
 
         <Text style={styles.heroPercentage}>
@@ -62,7 +148,7 @@ export default function DashboardScreen() {
         Subjects: {semester?.subjects.length}
       </Text>
 
-      {bestSubject && (
+      {bestSubject && bestSubject.stats.total > 0 && (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>🏆 Best Subject</Text>
 
@@ -215,4 +301,31 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 10,
   },
+  predictorCard: {
+  backgroundColor: "#FEF3C7",
+  padding: 15,
+  borderRadius: 12,
+  marginBottom: 15,
+  borderWidth: 1,
+  borderColor: "#F59E0B",
+},
+statsRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginBottom: 20,
+},
+
+statBox: {
+  flex: 1,
+  borderWidth: 1,
+  borderRadius: 12,
+  padding: 12,
+  alignItems: "center",
+  marginHorizontal: 4,
+},
+
+statNumber: {
+  fontSize: 20,
+  fontWeight: "bold",
+},
 });
