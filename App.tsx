@@ -1,8 +1,5 @@
-import React, { useEffect } from "react";
-//import * as Notifications from "expo-notifications";
-
-import BottomTabs from "./src/navigation/BottomTabs";
+import AppNavigator from "./src/navigation/AppNavigator";
 
 export default function App() {
-  return <BottomTabs />;
+  return <AppNavigator />;
 }
