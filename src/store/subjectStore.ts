@@ -28,6 +28,12 @@ interface SubjectState {
     semesterId: string
   ) => Promise<void>;
 
+  updateSubject: (
+    subject: Subject,
+    uid: string,
+    semesterId: string
+  ) => Promise<void>;
+
   deleteSubject: (
     subjectId: string,
     uid: string,
@@ -114,6 +120,34 @@ export const useSubjectStore =
           loading: false,
         });
       }
+    },
+
+    updateSubject: async (
+      subject,
+      uid,
+      semesterId
+    ) => {
+      await setDoc(
+        doc(
+          db,
+          "users",
+          uid,
+          "semesters",
+          semesterId,
+          "subjects",
+          subject.id
+        ),
+        subject
+      );
+
+      set((state) => ({
+        subjects:
+          state.subjects.map((s) =>
+            s.id === subject.id
+              ? subject
+              : s
+          ),
+      }));
     },
 
     deleteSubject: async (
