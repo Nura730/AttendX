@@ -1,7 +1,17 @@
 import { create } from "zustand";
 import { Semester } from "../types/semester";
+import {
+  doc,
+  setDoc,
+} from "firebase/firestore";
+
+import { db } from "../services/firebase";
 
 interface SemesterState {
+createSemester: (
+  semester: Semester,
+  uid: string
+) => Promise<void>;
   semester: Semester | null;
   loading: boolean;
 
@@ -14,6 +24,25 @@ interface SemesterState {
 
 export const useSemesterStore =
   create<SemesterState>((set) => ({
+    createSemester: async (
+  semester,
+  uid
+) => {
+  await setDoc(
+    doc(
+      db,
+      "users",
+      uid,
+      "semesters",
+      "current"
+    ),
+    semester
+  );
+
+  set({
+    semester,
+  });
+},
     semester: null,
 
     loading: false,
