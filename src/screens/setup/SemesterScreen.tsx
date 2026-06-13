@@ -7,6 +7,14 @@ import {
   Button,
 } from "react-native";
 
+import { Alert } from "react-native";
+
+import { useAuthStore } from "../../store/authStore";
+
+import { useSemesterStore } from "../../store/semesterStore";
+
+import { Semester } from "../../types/semester";
+
 export default function SemesterScreen() {
   const [semesterName, setSemesterName] =
     useState("");
@@ -20,6 +28,70 @@ export default function SemesterScreen() {
   const [plannedPeriods, setPlannedPeriods] =
     useState("");
 
+const user = useAuthStore(
+  (state) => state.user
+);
+
+const createSemester =
+  useSemesterStore(
+    (state) => state.createSemester
+  );
+
+  const handleSave =
+  async () => {
+    if (!user) {
+      return;
+    }
+
+    if (
+      !semesterName ||
+      !startDate ||
+      !endDate ||
+      !plannedPeriods
+    ) {
+      Alert.alert(
+        "Error",
+        "Fill all fields"
+      );
+      return;
+    }
+
+    const semester: Semester = {
+      id: "current",
+
+      semesterName,
+
+      startDate,
+
+      endDate,
+
+      plannedPeriods: Number(
+        plannedPeriods
+      ),
+
+      conductedPeriods: 0,
+
+      createdAt:
+        new Date().toISOString(),
+    };
+
+    try {
+      await createSemester(
+        semester,
+        user.uid
+      );
+
+      Alert.alert(
+        "Success",
+        "Semester Saved"
+      );
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.message
+      );
+    }
+  };
   return (
     <View
       style={{
@@ -81,7 +153,7 @@ export default function SemesterScreen() {
 
       <Button
         title="Save Semester"
-        onPress={() => {}}
+        onPress={handleSave}
       />
     </View>
   );
