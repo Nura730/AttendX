@@ -25,9 +25,6 @@ export default function SemesterScreen() {
   const [endDate, setEndDate] =
     useState("");
 
-  const [plannedPeriods, setPlannedPeriods] =
-    useState("");
-
 const user = useAuthStore(
   (state) => state.user
 );
@@ -46,8 +43,7 @@ const createSemester =
     if (
       !semesterName ||
       !startDate ||
-      !endDate ||
-      !plannedPeriods
+      !endDate
     ) {
       Alert.alert(
         "Error",
@@ -132,17 +128,6 @@ const createSemester =
         placeholder="End Date"
         value={endDate}
         onChangeText={setEndDate}
-        style={{
-          borderWidth: 1,
-          padding: 12,
-        }}
-      />
-
-      <TextInput
-        placeholder="Planned Total Periods"
-        keyboardType="numeric"
-        value={plannedPeriods}
-        onChangeText={setPlannedPeriods}
         style={{
           borderWidth: 1,
           padding: 12,
