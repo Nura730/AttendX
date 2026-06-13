@@ -4,6 +4,8 @@ import {
   View,
   Text,
   ScrollView,
+  Button,
+  Alert,
 } from "react-native";
 
 import { useSubjectStore } from "../../store/subjectStore";
@@ -42,7 +44,7 @@ export default function DashboardScreen() {
     <ScrollView
       contentContainerStyle={{
         padding: 20,
-        gap: 12,
+        gap: 15,
       }}
     >
       <View
@@ -69,7 +71,31 @@ export default function DashboardScreen() {
         >
           {overallAttendance}%
         </Text>
+
+        <Text>
+          {totalAttended} / {totalConducted}
+        </Text>
       </View>
+
+      <Button
+        title="Mark Today's Attendance"
+        onPress={() =>
+          Alert.alert(
+            "Next",
+            "Attendance Screen"
+          )
+        }
+      />
+
+      <Button
+        title="Attendance History"
+        onPress={() =>
+          Alert.alert(
+            "Next",
+            "History Screen"
+          )
+        }
+      />
 
       <Text
         style={{
@@ -83,8 +109,7 @@ export default function DashboardScreen() {
       {subjects.map(
         (subject) => {
           const percentage =
-            subject.totalPeriods ===
-            0
+            subject.totalPeriods === 0
               ? 0
               : (
                   (subject.attendedPeriods /
@@ -101,22 +126,44 @@ export default function DashboardScreen() {
                 borderRadius: 10,
               }}
             >
-              <Text>
+              <Text
+                style={{
+                  fontWeight: "bold",
+                  fontSize: 18,
+                }}
+              >
                 {subject.name}
               </Text>
 
               <Text>
+                Attended:
+                {" "}
                 {
                   subject.attendedPeriods
                 }
-                /
+              </Text>
+
+              <Text>
+                Total:
+                {" "}
                 {
                   subject.totalPeriods
                 }
               </Text>
 
               <Text>
+                Attendance:
+                {" "}
                 {percentage}%
+              </Text>
+
+              <Text>
+                Target:
+                {" "}
+                {
+                  subject.targetAttendance
+                }
+                %
               </Text>
             </View>
           );
