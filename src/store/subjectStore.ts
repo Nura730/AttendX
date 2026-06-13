@@ -4,6 +4,8 @@ import {
   collection,
   doc,
   setDoc,
+  getDocs,
+  deleteDoc,
 } from "firebase/firestore";
 
 import { db } from "../services/firebase";
@@ -17,6 +19,17 @@ interface SubjectState {
 
   createSubject: (
     subject: Subject,
+    uid: string,
+    semesterId: string
+  ) => Promise<void>;
+
+  loadSubjects: (
+    uid: string,
+    semesterId: string
+  ) => Promise<void>;
+
+  deleteSubject: (
+    subjectId: string,
     uid: string,
     semesterId: string
   ) => Promise<void>;
@@ -62,13 +75,83 @@ export const useSubjectStore =
           ],
         }));
       } finally {
-        set({ loading: false });
+        set({
+          loading: false,
+        });
       }
     },
 
-    setSubjects: (subjects) =>
-      set({ subjects }),
+    loadSubjects: async (
+      uid,
+      semesterId
+    ) => {
+      set({ loading: true });
+
+      try {
+        const snapshot =
+          await getDocs(
+            collection(
+              db,
+              "users",
+              uid,
+              "semesters",
+              semesterId,
+              "subjects"
+            )
+          );
+
+        const subjects =
+          snapshot.docs.map(
+            (doc) =>
+              doc.data() as Subject
+          );
+
+        set({
+          subjects,
+        });
+      } finally {
+        set({
+          loading: false,
+        });
+      }
+    },
+
+    deleteSubject: async (
+      subjectId,
+      uid,
+      semesterId
+    ) => {
+      await deleteDoc(
+        doc(
+          db,
+          "users",
+          uid,
+          "semesters",
+          semesterId,
+          "subjects",
+          subjectId
+        )
+      );
+
+      set((state) => ({
+        subjects:
+          state.subjects.filter(
+            (subject) =>
+              subject.id !==
+              subjectId
+          ),
+      }));
+    },
+
+    setSubjects: (
+      subjects
+    ) =>
+      set({
+        subjects,
+      }),
 
     clearSubjects: () =>
-      set({ subjects: [] }),
+      set({
+        subjects: [],
+      }),
   }));
