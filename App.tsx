@@ -1,9 +1,11 @@
-import React from 'react'
+import React from "react";
 
-const App = () => {
-  return (
-    <div>App</div>
-  )
+import AppNavigator from "./src/navigation/AppNavigator";
+
+import { useAuthListener } from "./src/hooks/useAuthListener";
+
+export default function App() {
+  useAuthListener();
+
+  return <AppNavigator />;
 }
-
-export default App
