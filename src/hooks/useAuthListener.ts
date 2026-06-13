@@ -5,6 +5,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../services/firebase";
 
 import { useAuthStore } from "../store/authStore";
+import { useSemesterStore } from "../store/semesterStore";
 
 export const useAuthListener = () => {
   const setUser =
@@ -12,12 +13,23 @@ export const useAuthListener = () => {
       (state) => state.setUser
     );
 
+  const loadSemester =
+    useSemesterStore(
+      (state) => state.loadSemester
+    );
+
   useEffect(() => {
     const unsubscribe =
       onAuthStateChanged(
         auth,
-        (user) => {
+        async (user) => {
           setUser(user);
+
+          if (user) {
+            await loadSemester(
+              user.uid
+            );
+          }
         }
       );
 
