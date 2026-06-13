@@ -23,6 +23,11 @@ export default function SubjectScreen() {
       (state) => state.semester
     );
 
+  const completeSetup =
+    useSemesterStore(
+      (state) => state.completeSetup
+    );
+
   const subjects =
     useSubjectStore(
       (state) => state.subjects
@@ -34,9 +39,26 @@ export default function SubjectScreen() {
         state.createSubject
     );
 
+  const updateSubject =
+    useSubjectStore(
+      (state) =>
+        state.updateSubject
+    );
+
+  const deleteSubject =
+    useSubjectStore(
+      (state) =>
+        state.deleteSubject
+    );
+
   const user = useAuthStore(
     (state) => state.user
   );
+
+  const [editingId, setEditingId] =
+    useState<string | null>(
+      null
+    );
 
   const [name, setName] =
     useState("");
@@ -49,7 +71,17 @@ export default function SubjectScreen() {
     setTargetAttendance,
   ] = useState("75");
 
-  const handleAdd =
+  const resetForm = () => {
+    setEditingId(null);
+
+    setName("");
+
+    setCode("");
+
+    setTargetAttendance("75");
+  };
+
+  const handleAddOrUpdate =
     async () => {
       if (!user) return;
 
@@ -69,42 +101,158 @@ export default function SubjectScreen() {
         return;
       }
 
-      const subject: Subject = {
-        id:
-          Date.now().toString(),
+      try {
+        if (editingId) {
+          const existing =
+            subjects.find(
+              (s) =>
+                s.id === editingId
+            );
 
-        name,
+          if (!existing) {
+            return;
+          }
 
-        code,
+          const updated: Subject =
+            {
+              ...existing,
 
-        totalPeriods: 0,
+              name,
 
-        attendedPeriods: 0,
+              code,
 
-        targetAttendance:
-          Number(
-            targetAttendance
-          ),
+              targetAttendance:
+                Number(
+                  targetAttendance
+                ),
+            };
 
-        isActive: true,
+          await updateSubject(
+            updated,
+            user.uid,
+            semester.id
+          );
 
-        createdAt:
-          new Date().toISOString(),
-      };
+          Alert.alert(
+            "Success",
+            "Subject Updated"
+          );
+        } else {
+          const subject: Subject =
+            {
+              id:
+                Date.now().toString(),
+
+              name,
+
+              code,
+
+              totalPeriods: 0,
+
+              attendedPeriods: 0,
+
+              targetAttendance:
+                Number(
+                  targetAttendance
+                ),
+
+              isActive: true,
+
+              createdAt:
+                new Date().toISOString(),
+            };
+
+          await createSubject(
+            subject,
+            user.uid,
+            semester.id
+          );
+
+          Alert.alert(
+            "Success",
+            "Subject Added"
+          );
+        }
+
+        resetForm();
+      } catch (error: any) {
+        Alert.alert(
+          "Error",
+          error.message
+        );
+      }
+    };
+
+  const handleEdit = (
+    subject: Subject
+  ) => {
+    setEditingId(subject.id);
+
+    setName(subject.name);
+
+    setCode(subject.code || "");
+
+    setTargetAttendance(
+      String(
+        subject.targetAttendance
+      )
+    );
+  };
+
+  const handleDelete =
+    async (
+      subjectId: string
+    ) => {
+      if (
+        !user ||
+        !semester
+      ) {
+        return;
+      }
 
       try {
-        await createSubject(
-          subject,
+        await deleteSubject(
+          subjectId,
           user.uid,
           semester.id
         );
 
-        setName("");
-        setCode("");
+        Alert.alert(
+          "Success",
+          "Subject Deleted"
+        );
+      } catch (error: any) {
+        Alert.alert(
+          "Error",
+          error.message
+        );
+      }
+    };
+
+  const handleDoneSetup =
+    async () => {
+      if (!user) return;
+
+      if (!semester) return;
+
+      if (
+        subjects.length === 0
+      ) {
+        Alert.alert(
+          "Error",
+          "Add at least one subject"
+        );
+        return;
+      }
+
+      try {
+        await completeSetup(
+          user.uid
+        );
 
         Alert.alert(
           "Success",
-          "Subject Added"
+          "Setup Completed"
         );
       } catch (error: any) {
         Alert.alert(
@@ -127,7 +275,9 @@ export default function SubjectScreen() {
           fontWeight: "bold",
         }}
       >
-        Add Subjects
+        {editingId
+          ? "Edit Subject"
+          : "Add Subjects"}
       </Text>
 
       <TextInput
@@ -164,9 +314,22 @@ export default function SubjectScreen() {
       />
 
       <Button
-        title="Add Subject"
-        onPress={handleAdd}
+        title={
+          editingId
+            ? "Update Subject"
+            : "Add Subject"
+        }
+        onPress={
+          handleAddOrUpdate
+        }
       />
+
+      {editingId && (
+        <Button
+          title="Cancel Edit"
+          onPress={resetForm}
+        />
+      )}
 
       <Text
         style={{
@@ -186,10 +349,16 @@ export default function SubjectScreen() {
               borderWidth: 1,
               padding: 12,
               borderRadius: 8,
+              gap: 8,
             }}
           >
             <Text>
               {subject.name}
+            </Text>
+
+            <Text>
+              Code:{" "}
+              {subject.code}
             </Text>
 
             <Text>
@@ -199,17 +368,32 @@ export default function SubjectScreen() {
               }
               %
             </Text>
+
+            <Button
+              title="Edit"
+              onPress={() =>
+                handleEdit(
+                  subject
+                )
+              }
+            />
+
+            <Button
+              title="Delete"
+              onPress={() =>
+                handleDelete(
+                  subject.id
+                )
+              }
+            />
           </View>
         )
       )}
 
       <Button
         title="Done Setup"
-        onPress={() =>
-          Alert.alert(
-            "Next",
-            "Dashboard coming next"
-          )
+        onPress={
+          handleDoneSetup
         }
       />
     </ScrollView>

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 import { useAuthStore } from "../store/authStore";
 import { useSemesterStore } from "../store/semesterStore";
-import { useSubjectStore } from "../store/subjectStore";
 
 import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
@@ -22,9 +21,9 @@ export default function AppNavigator() {
       (state) => state.semester
     );
 
-  const subjects =
-    useSubjectStore(
-      (state) => state.subjects
+  const loading =
+    useSemesterStore(
+      (state) => state.loading
     );
 
   const [showRegister, setShowRegister] =
@@ -50,11 +49,15 @@ export default function AppNavigator() {
     );
   }
 
+  if (loading) {
+    return null;
+  }
+
   if (!semester) {
     return <SemesterScreen />;
   }
 
-  if (subjects.length === 0) {
+  if (!semester.setupCompleted) {
     return <SubjectScreen />;
   }
 

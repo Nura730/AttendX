@@ -11,5 +11,7 @@ export interface Semester {
 
   isActive: boolean;
 
+  setupCompleted: boolean;
+
   createdAt: string;
 }

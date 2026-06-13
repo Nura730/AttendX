@@ -25,6 +25,10 @@ interface SemesterState {
     uid: string
   ) => Promise<void>;
 
+  completeSetup: (
+    uid: string
+  ) => Promise<void>;
+
   setSemester: (
     semester: Semester | null
   ) => void;
@@ -33,7 +37,7 @@ interface SemesterState {
 }
 
 export const useSemesterStore =
-  create<SemesterState>((set) => ({
+  create<SemesterState>((set, get) => ({
     semester: null,
 
     loading: false,
@@ -103,6 +107,39 @@ export const useSemesterStore =
           loading: false,
         });
       }
+    },
+
+    completeSetup: async (
+      uid
+    ) => {
+      const semester =
+        get().semester;
+
+      if (!semester) {
+        return;
+      }
+
+      const updatedSemester = {
+        ...semester,
+
+        setupCompleted: true,
+      };
+
+      await setDoc(
+        doc(
+          db,
+          "users",
+          uid,
+          "semesters",
+          semester.id
+        ),
+        updatedSemester
+      );
+
+      set({
+        semester:
+          updatedSemester,
+      });
     },
 
     setSemester: (

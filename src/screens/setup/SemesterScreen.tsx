@@ -5,9 +5,8 @@ import {
   Text,
   TextInput,
   Button,
+  Alert,
 } from "react-native";
-
-import { Alert } from "react-native";
 
 import { useAuthStore } from "../../store/authStore";
 
@@ -25,67 +24,70 @@ export default function SemesterScreen() {
   const [endDate, setEndDate] =
     useState("");
 
-const user = useAuthStore(
-  (state) => state.user
-);
-
-const createSemester =
-  useSemesterStore(
-    (state) => state.createSemester
+  const user = useAuthStore(
+    (state) => state.user
   );
 
+  const createSemester =
+    useSemesterStore(
+      (state) => state.createSemester
+    );
+
   const handleSave =
-  async () => {
-    if (!user) {
-      return;
-    }
+    async () => {
+      if (!user) {
+        return;
+      }
 
-    if (
-      !semesterName ||
-      !startDate ||
-      !endDate
-    ) {
-      Alert.alert(
-        "Error",
-        "Fill all fields"
-      );
-      return;
-    }
+      if (
+        !semesterName ||
+        !startDate ||
+        !endDate
+      ) {
+        Alert.alert(
+          "Error",
+          "Fill all fields"
+        );
+        return;
+      }
 
-    const semester: Semester = {
-  id: Date.now().toString(),
+      const semester: Semester = {
+        id: Date.now().toString(),
 
-  semesterName,
+        semesterName,
 
-  startDate,
+        startDate,
 
-  endDate,
+        endDate,
 
-  conductedPeriods: 0,
+        conductedPeriods: 0,
 
-  isActive: true,
+        isActive: true,
 
-  createdAt:
-    new Date().toISOString(),
-};
+        setupCompleted: false,
 
-    try {
-      await createSemester(
-        semester,
-        user.uid
-      );
+        createdAt:
+          new Date().toISOString(),
+      };
 
-      Alert.alert(
-        "Success",
-        "Semester Saved"
-      );
-    } catch (error: any) {
-      Alert.alert(
-        "Error",
-        error.message
-      );
-    }
-  };
+      try {
+        await createSemester(
+          semester,
+          user.uid
+        );
+
+        Alert.alert(
+          "Success",
+          "Semester Saved"
+        );
+      } catch (error: any) {
+        Alert.alert(
+          "Error",
+          error.message
+        );
+      }
+    };
+
   return (
     <View
       style={{
