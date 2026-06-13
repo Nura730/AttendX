@@ -6,6 +6,7 @@ import {
   TextInput,
   Button,
   Alert,
+  ScrollView,
 } from "react-native";
 
 import { Subject } from "../../types/subject";
@@ -13,28 +14,19 @@ import { Subject } from "../../types/subject";
 import { useSubjectStore } from "../../store/subjectStore";
 
 import { useAuthStore } from "../../store/authStore";
+
 import { useSemesterStore } from "../../store/semesterStore";
 
 export default function SubjectScreen() {
-    const semester =
-  useSemesterStore(
-    (state) => state.semester
-  );
+  const semester =
+    useSemesterStore(
+      (state) => state.semester
+    );
 
-  
-  const [name, setName] =
-    useState("");
-
-  const [code, setCode] =
-    useState("");
-
-  const [targetAttendance,
-    setTargetAttendance] =
-    useState("75");
-
-  const user = useAuthStore(
-    (state) => state.user
-  );
+  const subjects =
+    useSubjectStore(
+      (state) => state.subjects
+    );
 
   const createSubject =
     useSubjectStore(
@@ -42,12 +34,44 @@ export default function SubjectScreen() {
         state.createSubject
     );
 
+  const user = useAuthStore(
+    (state) => state.user
+  );
+
+  const [name, setName] =
+    useState("");
+
+  const [code, setCode] =
+    useState("");
+
+  const [
+    targetAttendance,
+    setTargetAttendance,
+  ] = useState("75");
+
   const handleAdd =
     async () => {
       if (!user) return;
 
+      if (!semester) {
+        Alert.alert(
+          "Error",
+          "No active semester"
+        );
+        return;
+      }
+
+      if (!name.trim()) {
+        Alert.alert(
+          "Error",
+          "Enter subject name"
+        );
+        return;
+      }
+
       const subject: Subject = {
-        id: Date.now().toString(),
+        id:
+          Date.now().toString(),
 
         name,
 
@@ -58,7 +82,9 @@ export default function SubjectScreen() {
         attendedPeriods: 0,
 
         targetAttendance:
-          Number(targetAttendance),
+          Number(
+            targetAttendance
+          ),
 
         isActive: true,
 
@@ -70,16 +96,16 @@ export default function SubjectScreen() {
         await createSubject(
           subject,
           user.uid,
-          "REPLACE_SEMESTER_ID"
+          semester.id
         );
+
+        setName("");
+        setCode("");
 
         Alert.alert(
           "Success",
           "Subject Added"
         );
-
-        setName("");
-        setCode("");
       } catch (error: any) {
         Alert.alert(
           "Error",
@@ -89,11 +115,9 @@ export default function SubjectScreen() {
     };
 
   return (
-    <View
-      style={{
-        flex: 1,
+    <ScrollView
+      contentContainerStyle={{
         padding: 20,
-        justifyContent: "center",
         gap: 12,
       }}
     >
@@ -103,7 +127,7 @@ export default function SubjectScreen() {
           fontWeight: "bold",
         }}
       >
-        Add Subject
+        Add Subjects
       </Text>
 
       <TextInput
@@ -143,6 +167,51 @@ export default function SubjectScreen() {
         title="Add Subject"
         onPress={handleAdd}
       />
-    </View>
+
+      <Text
+        style={{
+          fontSize: 20,
+          fontWeight: "bold",
+          marginTop: 20,
+        }}
+      >
+        Subjects Added
+      </Text>
+
+      {subjects.map(
+        (subject) => (
+          <View
+            key={subject.id}
+            style={{
+              borderWidth: 1,
+              padding: 12,
+              borderRadius: 8,
+            }}
+          >
+            <Text>
+              {subject.name}
+            </Text>
+
+            <Text>
+              Target:{" "}
+              {
+                subject.targetAttendance
+              }
+              %
+            </Text>
+          </View>
+        )
+      )}
+
+      <Button
+        title="Done Setup"
+        onPress={() =>
+          Alert.alert(
+            "Next",
+            "Dashboard coming next"
+          )
+        }
+      />
+    </ScrollView>
   );
 }
