@@ -1,21 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text } from "react-native";
 
 import { useAuthStore } from "../store/authStore";
 
-const AuthScreen = () => {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Auth Screen</Text>
-    </View>
-  );
-};
+import LoginScreen from "../screens/auth/LoginScreen";
+import RegisterScreen from "../screens/auth/RegisterScreen";
 
 const HomeScreen = () => {
   return (
@@ -26,7 +15,7 @@ const HomeScreen = () => {
         alignItems: "center",
       }}
     >
-      <Text>Home Screen</Text>
+      <Text>Logged In</Text>
     </View>
   );
 };
@@ -36,8 +25,27 @@ export default function AppNavigator() {
     (state) => state.user
   );
 
+  const [showRegister, setShowRegister] =
+    useState(false);
+
   if (!user) {
-    return <AuthScreen />;
+    if (showRegister) {
+      return (
+        <RegisterScreen
+          onLoginPress={() =>
+            setShowRegister(false)
+          }
+        />
+      );
+    }
+
+    return (
+      <LoginScreen
+        onRegisterPress={() =>
+          setShowRegister(true)
+        }
+      />
+    );
   }
 
   return <HomeScreen />;
