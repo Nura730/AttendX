@@ -1,16 +1,17 @@
 export type AttendanceStatus =
-  | "PRESENT"
-  | "ABSENT"
-  | "CANCELLED";
+  | "present"
+  | "absent";
 
-export interface AttendanceRecord {
-  id: string;
+export interface AttendancePeriod {
+  periodNumber: number;
 
   subjectId: string;
 
-  periodNumber: number;
+  status: AttendanceStatus;
+}
 
+export interface AttendanceDay {
   date: string;
 
-  status: AttendanceStatus;
+  periods: AttendancePeriod[];
 }

@@ -1,33 +1,12 @@
-export interface Subject {
-  id: string;
-
-  name: string;
-
-  facultyName: string;
-
-  totalPeriods: number;
-
-  attendedPeriods: number;
-
-  absentPeriods: number;
-}
-
 export interface Semester {
   id: string;
 
-  name: string;
+  semesterName: string;
 
-  targetAttendance: number;
+  startDate: string;
+  endDate: string;
 
-  totalSemesterPeriods: number;
+  plannedPeriods: number;
 
-  subjects: Subject[];
-}
-
-export interface UserProfile {
-  userId: string;
-
-  name: string;
-
-  email: string;
+  conductedPeriods: number;
 }
