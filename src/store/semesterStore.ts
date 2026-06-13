@@ -1,15 +1,15 @@
 import { create } from "zustand";
-
 import { Semester } from "../types/semester";
 
 interface SemesterState {
   semester: Semester | null;
-
   loading: boolean;
 
   setSemester: (
     semester: Semester | null
   ) => void;
+
+  clearSemester: () => void;
 }
 
 export const useSemesterStore =
@@ -20,4 +20,7 @@ export const useSemesterStore =
 
     setSemester: (semester) =>
       set({ semester }),
+
+    clearSemester: () =>
+      set({ semester: null }),
   }));
