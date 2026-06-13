@@ -5,7 +5,7 @@ import {
   Text,
 } from "react-native";
 
-export default function AttendanceScreen() {
+export default function HistoryScreen() {
   return (
     <View
       style={{
@@ -15,7 +15,7 @@ export default function AttendanceScreen() {
       }}
     >
       <Text>
-        Attendance Screen
+        Attendance History
       </Text>
     </View>
   );

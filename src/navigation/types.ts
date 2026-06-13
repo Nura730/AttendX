@@ -1,4 +1,4 @@
-export type RootStackParamList = {
+export type MainStackParamList = {
   Dashboard: undefined;
 
   Attendance: undefined;
