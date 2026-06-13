@@ -28,20 +28,26 @@ export const useSemesterStore =
   semester,
   uid
 ) => {
-  await setDoc(
-    doc(
-      db,
-      "users",
-      uid,
-      "semesters",
-      "current"
-    ),
-    semester
-  );
+  set({ loading: true });
 
-  set({
-    semester,
-  });
+  try {
+    await setDoc(
+      doc(
+        db,
+        "users",
+        uid,
+        "semesters",
+        "current"
+      ),
+      semester
+    );
+
+    set({
+      semester,
+    });
+  } finally {
+    set({ loading: false });
+  }
 },
     semester: null,
 
