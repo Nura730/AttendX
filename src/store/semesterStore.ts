@@ -33,12 +33,12 @@ export const useSemesterStore =
   try {
     await setDoc(
       doc(
-        db,
-        "users",
-        uid,
-        "semesters",
-        "current"
-      ),
+  db,
+  "users",
+  uid,
+  "semesters",
+  semester.id
+),
       semester
     );
 

@@ -6,6 +6,7 @@ import { useAuthStore } from "../store/authStore";
 import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
 import SemesterScreen from "../screens/setup/SemesterScreen";
+import SubjectScreen from "../screens/setup/SubjectScreen";
 const HomeScreen = () => {
   return (
     <View
@@ -48,5 +49,5 @@ export default function AppNavigator() {
     );
   }
 
-  return <SemesterScreen />;
+  return <SubjectScreen />;
 }

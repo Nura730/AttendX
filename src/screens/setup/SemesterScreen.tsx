@@ -57,23 +57,21 @@ const createSemester =
     }
 
     const semester: Semester = {
-      id: "current",
+  id: Date.now().toString(),
 
-      semesterName,
+  semesterName,
 
-      startDate,
+  startDate,
 
-      endDate,
+  endDate,
 
-      plannedPeriods: Number(
-        plannedPeriods
-      ),
+  conductedPeriods: 0,
 
-      conductedPeriods: 0,
+  isActive: true,
 
-      createdAt:
-        new Date().toISOString(),
-    };
+  createdAt:
+    new Date().toISOString(),
+};
 
     try {
       await createSemester(

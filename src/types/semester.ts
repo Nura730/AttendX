@@ -7,9 +7,9 @@ export interface Semester {
 
   endDate: string;
 
-  plannedPeriods: number;
-
   conductedPeriods: number;
+
+  isActive: boolean;
 
   createdAt: string;
 }
