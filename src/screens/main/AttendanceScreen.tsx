@@ -6,11 +6,11 @@ import React, {
 import {
   View,
   Text,
-  Button,
   ScrollView,
   Modal,
   Alert,
   TouchableOpacity,
+  Button,
 } from "react-native";
 
 import {
@@ -18,10 +18,13 @@ import {
 } from "react-native-calendars";
 
 import { useAuthStore } from "../../store/authStore";
-
 import { useSemesterStore } from "../../store/semesterStore";
-
 import { useAttendanceStore } from "../../store/attendanceStore";
+import { useSubjectStore } from "../../store/subjectStore";
+
+import {
+  AttendancePeriod,
+} from "../../types/attendance";
 
 export default function AttendanceScreen() {
   const user = useAuthStore(
@@ -31,6 +34,11 @@ export default function AttendanceScreen() {
   const semester =
     useSemesterStore(
       (state) => state.semester
+    );
+
+  const subjects =
+    useSubjectStore(
+      (state) => state.subjects
     );
 
   const attendanceHistory =
@@ -56,17 +64,30 @@ export default function AttendanceScreen() {
       .toISOString()
       .split("T")[0];
 
-  const [selectedDate, setSelectedDate] =
-    useState(today);
+  const [
+    selectedDate,
+    setSelectedDate,
+  ] = useState(today);
 
-  const [calendarVisible, setCalendarVisible] =
-    useState(false);
+  const [
+    calendarVisible,
+    setCalendarVisible,
+  ] = useState(false);
 
-  const [isEditing, setIsEditing] =
-    useState(false);
+  const [
+    isEditing,
+    setIsEditing,
+  ] = useState(false);
 
-  const [hasUnsavedChanges, setHasUnsavedChanges] =
-    useState(false);
+  const [
+    hasUnsavedChanges,
+    setHasUnsavedChanges,
+  ] = useState(false);
+
+  const [periods, setPeriods] =
+    useState<
+      AttendancePeriod[]
+    >([]);
 
   useEffect(() => {
     if (
@@ -83,12 +104,12 @@ export default function AttendanceScreen() {
   }, []);
 
   useEffect(() => {
-    checkAttendance(
+    loadAttendance(
       selectedDate
     );
   }, [selectedDate]);
 
-  const checkAttendance =
+  const loadAttendance =
     async (
       date: string
     ) => {
@@ -106,9 +127,23 @@ export default function AttendanceScreen() {
           semester.id
         );
 
-      setIsEditing(
-        !!attendance
-      );
+      if (attendance) {
+        setIsEditing(true);
+
+        setPeriods(
+          attendance.periods
+        );
+      } else {
+        setIsEditing(false);
+
+        setPeriods([
+          {
+            periodNumber: 1,
+            subjectId: "",
+            status: "present",
+          },
+        ]);
+      }
     };
 
   const markedDates =
@@ -134,15 +169,11 @@ export default function AttendanceScreen() {
     (
       date: string
     ) => {
-      const todayDate =
-        new Date(
-          today
-        );
-
       const selected =
-        new Date(
-          date
-        );
+        new Date(date);
+
+      const todayDate =
+        new Date(today);
 
       if (
         selected >
@@ -192,14 +223,55 @@ export default function AttendanceScreen() {
         return;
       }
 
-      setSelectedDate(
-        date
-      );
+      setSelectedDate(date);
 
       setCalendarVisible(
         false
       );
     };
+
+  const addPeriod = () => {
+    setPeriods([
+      ...periods,
+      {
+        periodNumber:
+          periods.length + 1,
+        subjectId: "",
+        status: "present",
+      },
+    ]);
+
+    setHasUnsavedChanges(
+      true
+    );
+  };
+
+  const deletePeriod = (
+    index: number
+  ) => {
+    const updated =
+      periods
+        .filter(
+          (_, i) =>
+            i !== index
+        )
+        .map(
+          (
+            period,
+            idx
+          ) => ({
+            ...period,
+            periodNumber:
+              idx + 1,
+          })
+        );
+
+    setPeriods(updated);
+
+    setHasUnsavedChanges(
+      true
+    );
+  };
 
   return (
     <ScrollView
@@ -226,28 +298,15 @@ export default function AttendanceScreen() {
         }
       />
 
-      <Text
-        style={{
-          fontSize: 18,
-          fontWeight: "600",
-        }}
-      >
-        Selected Date:
-      </Text>
-
-      <Text
-        style={{
-          fontSize: 18,
-        }}
-      >
+      <Text>
         {selectedDate}
       </Text>
 
       <View
         style={{
-          padding: 15,
           borderWidth: 1,
           borderRadius: 10,
+          padding: 15,
         }}
       >
         <Text
@@ -260,11 +319,236 @@ export default function AttendanceScreen() {
             ? "Editing Attendance"
             : "Creating Attendance"}
         </Text>
-
-        <Text>
-          {selectedDate}
-        </Text>
       </View>
+
+      {periods.map(
+        (
+          period,
+          index
+        ) => (
+          <View
+            key={index}
+            style={{
+              borderWidth: 1,
+              borderRadius: 10,
+              padding: 15,
+              gap: 10,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight:
+                  "bold",
+              }}
+            >
+              Period{" "}
+              {
+                period.periodNumber
+              }
+            </Text>
+
+            <Text>
+              Subject
+            </Text>
+
+            <View
+              style={{
+                flexDirection:
+                  "row",
+                flexWrap:
+                  "wrap",
+                gap: 8,
+              }}
+            >
+              {subjects.map(
+                (
+                  subject
+                ) => (
+                  <TouchableOpacity
+                    key={
+                      subject.id
+                    }
+                    style={{
+                      padding: 10,
+                      borderRadius: 8,
+                      backgroundColor:
+                        period.subjectId ===
+                        subject.id
+                          ? "#2563eb"
+                          : "#e5e7eb",
+                    }}
+                    onPress={() => {
+                      const copy =
+                        [
+                          ...periods,
+                        ];
+
+                      copy[
+                        index
+                      ].subjectId =
+                        subject.id;
+
+                      setPeriods(
+                        copy
+                      );
+
+                      setHasUnsavedChanges(
+                        true
+                      );
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color:
+                          period.subjectId ===
+                          subject.id
+                            ? "white"
+                            : "black",
+                      }}
+                    >
+                      {
+                        subject.name
+                      }
+                    </Text>
+                  </TouchableOpacity>
+                )
+              )}
+            </View>
+
+            <Text>
+              Status
+            </Text>
+
+            <View
+              style={{
+                flexDirection:
+                  "row",
+                gap: 10,
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  padding: 12,
+                  borderRadius: 8,
+                  backgroundColor:
+                    period.status ===
+                    "present"
+                      ? "green"
+                      : "#e5e7eb",
+                }}
+                onPress={() => {
+                  const copy =
+                    [
+                      ...periods,
+                    ];
+
+                  copy[
+                    index
+                  ].status =
+                    "present";
+
+                  setPeriods(
+                    copy
+                  );
+
+                  setHasUnsavedChanges(
+                    true
+                  );
+                }}
+              >
+                <Text
+                  style={{
+                    textAlign:
+                      "center",
+                    color:
+                      period.status ===
+                      "present"
+                        ? "white"
+                        : "black",
+                  }}
+                >
+                  Present
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  padding: 12,
+                  borderRadius: 8,
+                  backgroundColor:
+                    period.status ===
+                    "absent"
+                      ? "red"
+                      : "#e5e7eb",
+                }}
+                onPress={() => {
+                  const copy =
+                    [
+                      ...periods,
+                    ];
+
+                  copy[
+                    index
+                  ].status =
+                    "absent";
+
+                  setPeriods(
+                    copy
+                  );
+
+                  setHasUnsavedChanges(
+                    true
+                  );
+                }}
+              >
+                <Text
+                  style={{
+                    textAlign:
+                      "center",
+                    color:
+                      period.status ===
+                      "absent"
+                        ? "white"
+                        : "black",
+                  }}
+                >
+                  Absent
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {periods.length >
+              1 && (
+              <Button
+                title="Delete Period"
+                onPress={() =>
+                  deletePeriod(
+                    index
+                  )
+                }
+              />
+            )}
+          </View>
+        )
+      )}
+
+      <Button
+        title="+ Add Period"
+        onPress={addPeriod}
+      />
+
+      <Button
+        title="Save Attendance"
+        onPress={() =>
+          Alert.alert(
+            "Next",
+            "Save Logic Phase 3"
+          )
+        }
+      />
 
       <Modal
         visible={
@@ -291,26 +575,14 @@ export default function AttendanceScreen() {
             }
           />
 
-          <TouchableOpacity
-            style={{
-              margin: 20,
-            }}
+          <Button
+            title="Close"
             onPress={() =>
               setCalendarVisible(
                 false
               )
             }
-          >
-            <Text
-              style={{
-                textAlign:
-                  "center",
-                fontSize: 18,
-              }}
-            >
-              Close
-            </Text>
-          </TouchableOpacity>
+          />
         </View>
       </Modal>
     </ScrollView>
