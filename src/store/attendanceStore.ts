@@ -28,6 +28,12 @@ interface AttendanceState {
     semesterId: string
   ) => Promise<void>;
 
+  hasAttendanceForDate: (
+    date: string,
+    uid: string,
+    semesterId: string
+  ) => Promise<boolean>;
+
   loadAttendanceByDate: (
     date: string,
     uid: string,
@@ -72,6 +78,28 @@ export const useAttendanceStore =
           attendance
         );
       },
+
+      hasAttendanceForDate:
+        async (
+          date,
+          uid,
+          semesterId
+        ) => {
+          const snapshot =
+            await getDoc(
+              doc(
+                db,
+                "users",
+                uid,
+                "semesters",
+                semesterId,
+                "attendance",
+                date
+              )
+            );
+
+          return snapshot.exists();
+        },
 
       loadAttendanceByDate:
         async (
@@ -206,10 +234,8 @@ export const useAttendanceStore =
 
                 return {
                   ...subject,
-
                   totalPeriods:
                     total,
-
                   attendedPeriods:
                     attended,
                 };
