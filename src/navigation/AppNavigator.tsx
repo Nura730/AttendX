@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 
+import {
+  NavigationContainer,
+} from "@react-navigation/native";
+
 import { useAuthStore } from "../store/authStore";
+
 import { useSemesterStore } from "../store/semesterStore";
 
 import LoginScreen from "../screens/auth/LoginScreen";
@@ -9,7 +14,7 @@ import RegisterScreen from "../screens/auth/RegisterScreen";
 import SemesterScreen from "../screens/setup/SemesterScreen";
 import SubjectScreen from "../screens/setup/SubjectScreen";
 
-import DashboardScreen from "../screens/main/DashboardScreen";
+import MainNavigator from "./MainNavigator";
 
 export default function AppNavigator() {
   const user = useAuthStore(
@@ -57,9 +62,15 @@ export default function AppNavigator() {
     return <SemesterScreen />;
   }
 
-  if (!semester.setupCompleted) {
+  if (
+    !semester.setupCompleted
+  ) {
     return <SubjectScreen />;
   }
 
-  return <DashboardScreen />;
+  return (
+    <NavigationContainer>
+      <MainNavigator />
+    </NavigationContainer>
+  );
 }
