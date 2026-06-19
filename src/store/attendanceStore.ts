@@ -51,6 +51,10 @@ interface AttendanceState {
     uid: string,
     semesterId: string
   ) => Promise<void>;
+
+  setAttendanceHistory: (
+  attendance: AttendanceDay[]
+) => void;
 }
 
 export const useAttendanceStore =
@@ -193,6 +197,8 @@ export const useAttendanceStore =
                 doc.data() as AttendanceDay
             );
 
+            
+
           const subjects =
             subjectSnapshot.docs.map(
               (doc) =>
@@ -232,6 +238,8 @@ export const useAttendanceStore =
                   }
                 );
 
+                
+
                 return {
                   ...subject,
                   totalPeriods:
@@ -242,20 +250,29 @@ export const useAttendanceStore =
               }
             );
 
+            
+
           for (const subject of updatedSubjects) {
-            await setDoc(
-              doc(
-                db,
-                "users",
-                uid,
-                "semesters",
-                semesterId,
-                "subjects",
-                subject.id
-              ),
-              subject
-            );
-          }
-        },
-    })
+  await setDoc(
+    doc(
+      db,
+      "users",
+      uid,
+      "semesters",
+      semesterId,
+      "subjects",
+      subject.id
+    ),
+    subject
+  );
+}
+},
+
+setAttendanceHistory: (
+  attendanceHistory
+) =>
+  set({
+    attendanceHistory,
+  }),
+})
   );

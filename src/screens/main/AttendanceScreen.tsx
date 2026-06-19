@@ -1,7 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-} from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   View,
@@ -13,264 +10,164 @@ import {
   Button,
 } from "react-native";
 
-import {
-  Calendar,
-} from "react-native-calendars";
+import { Calendar } from "react-native-calendars";
 
 import { useAuthStore } from "../../store/authStore";
 import { useSemesterStore } from "../../store/semesterStore";
 import { useAttendanceStore } from "../../store/attendanceStore";
 import { useSubjectStore } from "../../store/subjectStore";
 
-import {
-  AttendancePeriod,
-} from "../../types/attendance";
+import { AttendancePeriod } from "../../types/attendance";
 
 export default function AttendanceScreen() {
-  const user = useAuthStore(
-    (state) => state.user
+  const user = useAuthStore((state) => state.user);
+
+  const semester = useSemesterStore((state) => state.semester);
+
+  const subjects = useSubjectStore((state) => state.subjects);
+
+  const attendanceHistory = useAttendanceStore(
+    (state) => state.attendanceHistory,
   );
 
-  const semester =
-    useSemesterStore(
-      (state) => state.semester
-    );
+  const loadAttendanceHistory = useAttendanceStore(
+    (state) => state.loadAttendanceHistory,
+  );
 
-  const subjects =
-    useSubjectStore(
-      (state) => state.subjects
-    );
+  const loadAttendanceByDate = useAttendanceStore(
+    (state) => state.loadAttendanceByDate,
+  );
 
-  const attendanceHistory =
-    useAttendanceStore(
-      (state) =>
-        state.attendanceHistory
-    );
+  const saveAttendance = useAttendanceStore((state) => state.saveAttendance);
 
-  const loadAttendanceHistory =
-    useAttendanceStore(
-      (state) =>
-        state.loadAttendanceHistory
-    );
+  const recalculateSubjectStats = useAttendanceStore(
+    (state) => state.recalculateSubjectStats,
+  );
 
-  const loadAttendanceByDate =
-    useAttendanceStore(
-      (state) =>
-        state.loadAttendanceByDate
-    );
+  const loadSubjects = useSubjectStore((state) => state.loadSubjects);
 
-  const today =
-    new Date()
-      .toISOString()
-      .split("T")[0];
+  const today = new Date().toISOString().split("T")[0];
 
-  const [
-    selectedDate,
-    setSelectedDate,
-  ] = useState(today);
+  const [selectedDate, setSelectedDate] = useState(today);
 
-  const [
-    calendarVisible,
-    setCalendarVisible,
-  ] = useState(false);
+  const [calendarVisible, setCalendarVisible] = useState(false);
 
-  const [
-    isEditing,
-    setIsEditing,
-  ] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
-  const [
-    hasUnsavedChanges,
-    setHasUnsavedChanges,
-  ] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const [periods, setPeriods] =
-    useState<
-      AttendancePeriod[]
-    >([]);
+  const [periods, setPeriods] = useState<AttendancePeriod[]>([]);
 
   useEffect(() => {
-    if (
-      !user ||
-      !semester
-    ) {
+    if (!user || !semester) {
       return;
     }
 
-    loadAttendanceHistory(
-      user.uid,
-      semester.id
-    );
+    loadAttendanceHistory(user.uid, semester.id);
   }, []);
 
   useEffect(() => {
-    loadAttendance(
-      selectedDate
-    );
+    loadAttendance(selectedDate);
   }, [selectedDate]);
 
-  const loadAttendance =
-    async (
-      date: string
-    ) => {
-      if (
-        !user ||
-        !semester
-      ) {
-        return;
-      }
+  const loadAttendance = async (date: string) => {
+    if (!user || !semester) {
+      return;
+    }
 
-      const attendance =
-        await loadAttendanceByDate(
-          date,
-          user.uid,
-          semester.id
-        );
+    const attendance = await loadAttendanceByDate(date, user.uid, semester.id);
 
-      if (attendance) {
-        setIsEditing(true);
+    if (attendance) {
+      setIsEditing(true);
 
-        setPeriods(
-          attendance.periods
-        );
-      } else {
-        setIsEditing(false);
+      setPeriods(attendance.periods);
+    } else {
+      setIsEditing(false);
 
-        setPeriods([
-          {
-            periodNumber: 1,
-            subjectId: "",
-            status: "present",
-          },
-        ]);
-      }
+      setPeriods([
+        {
+          periodNumber: 1,
+          subjectId: "",
+          status: "present",
+        },
+      ]);
+    }
+  };
+
+  const markedDates = attendanceHistory.reduce((acc, item) => {
+    acc[item.date] = {
+      marked: true,
+      selected: item.date === selectedDate,
     };
 
-  const markedDates =
-    attendanceHistory.reduce(
-      (acc, item) => {
-        acc[item.date] = {
-          marked: true,
-          selected:
-            item.date ===
-            selectedDate,
-        };
-
-        return acc;
-      },
-      {} as any
-    );
+    return acc;
+  }, {} as any);
 
   markedDates[selectedDate] = {
     selected: true,
   };
 
-  const handleDateSelect =
-    (
-      date: string
-    ) => {
-      const selected =
-        new Date(date);
+  const handleDateSelect = (date: string) => {
+    const selected = new Date(date);
 
-      const todayDate =
-        new Date(today);
+    const todayDate = new Date(today);
 
-      if (
-        selected >
-        todayDate
-      ) {
-        Alert.alert(
-          "Error",
-          "Future dates are not allowed"
-        );
+    if (selected > todayDate) {
+      Alert.alert("Error", "Future dates are not allowed");
 
-        return;
-      }
+      return;
+    }
 
-      if (
-        hasUnsavedChanges
-      ) {
-        Alert.alert(
-          "Unsaved Changes",
-          "Changes will be lost",
-          [
-            {
-              text: "Cancel",
-              style:
-                "cancel",
-            },
-            {
-              text:
-                "Continue",
-              onPress:
-                () => {
-                  setSelectedDate(
-                    date
-                  );
+    if (hasUnsavedChanges) {
+      Alert.alert("Unsaved Changes", "Changes will be lost", [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Continue",
+          onPress: () => {
+            setSelectedDate(date);
 
-                  setHasUnsavedChanges(
-                    false
-                  );
+            setHasUnsavedChanges(false);
 
-                  setCalendarVisible(
-                    false
-                  );
-                },
-            },
-          ]
-        );
+            setCalendarVisible(false);
+          },
+        },
+      ]);
 
-        return;
-      }
+      return;
+    }
 
-      setSelectedDate(date);
+    setSelectedDate(date);
 
-      setCalendarVisible(
-        false
-      );
-    };
+    setCalendarVisible(false);
+  };
 
   const addPeriod = () => {
     setPeriods([
       ...periods,
       {
-        periodNumber:
-          periods.length + 1,
+        periodNumber: periods.length + 1,
         subjectId: "",
         status: "present",
       },
     ]);
 
-    setHasUnsavedChanges(
-      true
-    );
+    setHasUnsavedChanges(true);
   };
 
-  const deletePeriod = (
-    index: number
-  ) => {
-    const updated =
-      periods
-        .filter(
-          (_, i) =>
-            i !== index
-        )
-        .map(
-          (
-            period,
-            idx
-          ) => ({
-            ...period,
-            periodNumber:
-              idx + 1,
-          })
-        );
+  const deletePeriod = (index: number) => {
+    const updated = periods
+      .filter((_, i) => i !== index)
+      .map((period, idx) => ({
+        ...period,
+        periodNumber: idx + 1,
+      }));
 
     setPeriods(updated);
 
-    setHasUnsavedChanges(
-      true
-    );
+    setHasUnsavedChanges(true);
   };
 
   return (
@@ -289,18 +186,9 @@ export default function AttendanceScreen() {
         Attendance
       </Text>
 
-      <Button
-        title="📅 Select Date"
-        onPress={() =>
-          setCalendarVisible(
-            true
-          )
-        }
-      />
+      <Button title="📅 Select Date" onPress={() => setCalendarVisible(true)} />
 
-      <Text>
-        {selectedDate}
-      </Text>
+      <Text>{selectedDate}</Text>
 
       <View
         style={{
@@ -315,247 +203,188 @@ export default function AttendanceScreen() {
             fontWeight: "bold",
           }}
         >
-          {isEditing
-            ? "Editing Attendance"
-            : "Creating Attendance"}
+          {isEditing ? "Editing Attendance" : "Creating Attendance"}
         </Text>
       </View>
 
-      {periods.map(
-        (
-          period,
-          index
-        ) => (
-          <View
-            key={index}
+      {periods.map((period, index) => (
+        <View
+          key={index}
+          style={{
+            borderWidth: 1,
+            borderRadius: 10,
+            padding: 15,
+            gap: 10,
+          }}
+        >
+          <Text
             style={{
-              borderWidth: 1,
-              borderRadius: 10,
-              padding: 15,
+              fontSize: 18,
+              fontWeight: "bold",
+            }}
+          >
+            Period {period.periodNumber}
+          </Text>
+
+          <Text>Subject</Text>
+
+          <View
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              gap: 8,
+            }}
+          >
+            {subjects.map((subject) => (
+              <TouchableOpacity
+                key={subject.id}
+                style={{
+                  padding: 10,
+                  borderRadius: 8,
+                  backgroundColor:
+                    period.subjectId === subject.id ? "#2563eb" : "#e5e7eb",
+                }}
+                onPress={() => {
+                  const copy = [...periods];
+
+                  copy[index].subjectId = subject.id;
+
+                  setPeriods(copy);
+
+                  setHasUnsavedChanges(true);
+                }}
+              >
+                <Text
+                  style={{
+                    color: period.subjectId === subject.id ? "white" : "black",
+                  }}
+                >
+                  {subject.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <Text>Status</Text>
+
+          <View
+            style={{
+              flexDirection: "row",
               gap: 10,
             }}
           >
-            <Text
+            <TouchableOpacity
               style={{
-                fontSize: 18,
-                fontWeight:
-                  "bold",
+                flex: 1,
+                padding: 12,
+                borderRadius: 8,
+                backgroundColor:
+                  period.status === "present" ? "green" : "#e5e7eb",
+              }}
+              onPress={() => {
+                const copy = [...periods];
+
+                copy[index].status = "present";
+
+                setPeriods(copy);
+
+                setHasUnsavedChanges(true);
               }}
             >
-              Period{" "}
-              {
-                period.periodNumber
-              }
-            </Text>
-
-            <Text>
-              Subject
-            </Text>
-
-            <View
-              style={{
-                flexDirection:
-                  "row",
-                flexWrap:
-                  "wrap",
-                gap: 8,
-              }}
-            >
-              {subjects.map(
-                (
-                  subject
-                ) => (
-                  <TouchableOpacity
-                    key={
-                      subject.id
-                    }
-                    style={{
-                      padding: 10,
-                      borderRadius: 8,
-                      backgroundColor:
-                        period.subjectId ===
-                        subject.id
-                          ? "#2563eb"
-                          : "#e5e7eb",
-                    }}
-                    onPress={() => {
-                      const copy =
-                        [
-                          ...periods,
-                        ];
-
-                      copy[
-                        index
-                      ].subjectId =
-                        subject.id;
-
-                      setPeriods(
-                        copy
-                      );
-
-                      setHasUnsavedChanges(
-                        true
-                      );
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color:
-                          period.subjectId ===
-                          subject.id
-                            ? "white"
-                            : "black",
-                      }}
-                    >
-                      {
-                        subject.name
-                      }
-                    </Text>
-                  </TouchableOpacity>
-                )
-              )}
-            </View>
-
-            <Text>
-              Status
-            </Text>
-
-            <View
-              style={{
-                flexDirection:
-                  "row",
-                gap: 10,
-              }}
-            >
-              <TouchableOpacity
+              <Text
                 style={{
-                  flex: 1,
-                  padding: 12,
-                  borderRadius: 8,
-                  backgroundColor:
-                    period.status ===
-                    "present"
-                      ? "green"
-                      : "#e5e7eb",
-                }}
-                onPress={() => {
-                  const copy =
-                    [
-                      ...periods,
-                    ];
-
-                  copy[
-                    index
-                  ].status =
-                    "present";
-
-                  setPeriods(
-                    copy
-                  );
-
-                  setHasUnsavedChanges(
-                    true
-                  );
+                  textAlign: "center",
+                  color: period.status === "present" ? "white" : "black",
                 }}
               >
-                <Text
-                  style={{
-                    textAlign:
-                      "center",
-                    color:
-                      period.status ===
-                      "present"
-                        ? "white"
-                        : "black",
-                  }}
-                >
-                  Present
-                </Text>
-              </TouchableOpacity>
+                Present
+              </Text>
+            </TouchableOpacity>
 
-              <TouchableOpacity
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                padding: 12,
+                borderRadius: 8,
+                backgroundColor: period.status === "absent" ? "red" : "#e5e7eb",
+              }}
+              onPress={() => {
+                const copy = [...periods];
+
+                copy[index].status = "absent";
+
+                setPeriods(copy);
+
+                setHasUnsavedChanges(true);
+              }}
+            >
+              <Text
                 style={{
-                  flex: 1,
-                  padding: 12,
-                  borderRadius: 8,
-                  backgroundColor:
-                    period.status ===
-                    "absent"
-                      ? "red"
-                      : "#e5e7eb",
-                }}
-                onPress={() => {
-                  const copy =
-                    [
-                      ...periods,
-                    ];
-
-                  copy[
-                    index
-                  ].status =
-                    "absent";
-
-                  setPeriods(
-                    copy
-                  );
-
-                  setHasUnsavedChanges(
-                    true
-                  );
+                  textAlign: "center",
+                  color: period.status === "absent" ? "white" : "black",
                 }}
               >
-                <Text
-                  style={{
-                    textAlign:
-                      "center",
-                    color:
-                      period.status ===
-                      "absent"
-                        ? "white"
-                        : "black",
-                  }}
-                >
-                  Absent
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {periods.length >
-              1 && (
-              <Button
-                title="Delete Period"
-                onPress={() =>
-                  deletePeriod(
-                    index
-                  )
-                }
-              />
-            )}
+                Absent
+              </Text>
+            </TouchableOpacity>
           </View>
-        )
-      )}
 
-      <Button
-        title="+ Add Period"
-        onPress={addPeriod}
-      />
+          {periods.length > 1 && (
+            <Button title="Delete Period" onPress={() => deletePeriod(index)} />
+          )}
+        </View>
+      ))}
+
+      <Button title="+ Add Period" onPress={addPeriod} />
 
       <Button
         title="Save Attendance"
-        onPress={() =>
-          Alert.alert(
-            "Next",
-            "Save Logic Phase 3"
-          )
-        }
+        onPress={async () => {
+          if (!user || !semester) {
+            return;
+          }
+
+          if (periods.length === 0) {
+            Alert.alert("Error", "Add at least one period");
+            return;
+          }
+
+          const hasEmptySubject = periods.some((period) => !period.subjectId);
+
+          if (hasEmptySubject) {
+            Alert.alert("Error", "Select subject for all periods");
+            return;
+          }
+
+          try {
+            await saveAttendance(
+              {
+                date: selectedDate,
+                periods,
+              },
+              user.uid,
+              semester.id,
+            );
+
+            await recalculateSubjectStats(user.uid, semester.id);
+
+            await loadSubjects(user.uid, semester.id);
+
+            await loadAttendanceHistory(user.uid, semester.id);
+
+            setHasUnsavedChanges(false);
+
+            Alert.alert(
+              "Success",
+              isEditing ? "Attendance Updated" : "Attendance Saved",
+            );
+          } catch (error: any) {
+            Alert.alert("Error", error.message);
+          }
+        }}
       />
 
-      <Modal
-        visible={
-          calendarVisible
-        }
-        animationType="slide"
-      >
+      <Modal visible={calendarVisible} animationType="slide">
         <View
           style={{
             flex: 1,
@@ -563,26 +392,11 @@ export default function AttendanceScreen() {
           }}
         >
           <Calendar
-            markedDates={
-              markedDates
-            }
-            onDayPress={(
-              day
-            ) =>
-              handleDateSelect(
-                day.dateString
-              )
-            }
+            markedDates={markedDates}
+            onDayPress={(day) => handleDateSelect(day.dateString)}
           />
 
-          <Button
-            title="Close"
-            onPress={() =>
-              setCalendarVisible(
-                false
-              )
-            }
-          />
+          <Button title="Close" onPress={() => setCalendarVisible(false)} />
         </View>
       </Modal>
     </ScrollView>
