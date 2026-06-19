@@ -1,57 +1,205 @@
-import React, { useState } from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
 
 import {
   View,
   Text,
   Button,
   ScrollView,
+  Modal,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 
-import { Picker } from "@react-native-picker/picker";
+import {
+  Calendar,
+} from "react-native-calendars";
 
-import { useSubjectStore } from "../../store/subjectStore";
+import { useAuthStore } from "../../store/authStore";
 
-interface PeriodEntry {
-  subjectId: string;
-  status: "present" | "absent";
-}
+import { useSemesterStore } from "../../store/semesterStore";
+
+import { useAttendanceStore } from "../../store/attendanceStore";
 
 export default function AttendanceScreen() {
-  const subjects =
-    useSubjectStore(
-      (state) => state.subjects
+  const user = useAuthStore(
+    (state) => state.user
+  );
+
+  const semester =
+    useSemesterStore(
+      (state) => state.semester
     );
 
-  const [periodCount, setPeriodCount] =
-    useState(5);
-
-  const [entries, setEntries] =
-    useState<PeriodEntry[]>(
-      Array.from(
-        { length: 5 },
-        () => ({
-          subjectId: "",
-          status: "present",
-        })
-      )
+  const attendanceHistory =
+    useAttendanceStore(
+      (state) =>
+        state.attendanceHistory
     );
 
-  const generatePeriods = (
-    count: number
-  ) => {
-    setPeriodCount(count);
-
-    setEntries(
-      Array.from(
-        { length: count },
-        () => ({
-          subjectId: "",
-          status: "present",
-        })
-      )
+  const loadAttendanceHistory =
+    useAttendanceStore(
+      (state) =>
+        state.loadAttendanceHistory
     );
+
+  const loadAttendanceByDate =
+    useAttendanceStore(
+      (state) =>
+        state.loadAttendanceByDate
+    );
+
+  const today =
+    new Date()
+      .toISOString()
+      .split("T")[0];
+
+  const [selectedDate, setSelectedDate] =
+    useState(today);
+
+  const [calendarVisible, setCalendarVisible] =
+    useState(false);
+
+  const [isEditing, setIsEditing] =
+    useState(false);
+
+  const [hasUnsavedChanges, setHasUnsavedChanges] =
+    useState(false);
+
+  useEffect(() => {
+    if (
+      !user ||
+      !semester
+    ) {
+      return;
+    }
+
+    loadAttendanceHistory(
+      user.uid,
+      semester.id
+    );
+  }, []);
+
+  useEffect(() => {
+    checkAttendance(
+      selectedDate
+    );
+  }, [selectedDate]);
+
+  const checkAttendance =
+    async (
+      date: string
+    ) => {
+      if (
+        !user ||
+        !semester
+      ) {
+        return;
+      }
+
+      const attendance =
+        await loadAttendanceByDate(
+          date,
+          user.uid,
+          semester.id
+        );
+
+      setIsEditing(
+        !!attendance
+      );
+    };
+
+  const markedDates =
+    attendanceHistory.reduce(
+      (acc, item) => {
+        acc[item.date] = {
+          marked: true,
+          selected:
+            item.date ===
+            selectedDate,
+        };
+
+        return acc;
+      },
+      {} as any
+    );
+
+  markedDates[selectedDate] = {
+    selected: true,
   };
+
+  const handleDateSelect =
+    (
+      date: string
+    ) => {
+      const todayDate =
+        new Date(
+          today
+        );
+
+      const selected =
+        new Date(
+          date
+        );
+
+      if (
+        selected >
+        todayDate
+      ) {
+        Alert.alert(
+          "Error",
+          "Future dates are not allowed"
+        );
+
+        return;
+      }
+
+      if (
+        hasUnsavedChanges
+      ) {
+        Alert.alert(
+          "Unsaved Changes",
+          "Changes will be lost",
+          [
+            {
+              text: "Cancel",
+              style:
+                "cancel",
+            },
+            {
+              text:
+                "Continue",
+              onPress:
+                () => {
+                  setSelectedDate(
+                    date
+                  );
+
+                  setHasUnsavedChanges(
+                    false
+                  );
+
+                  setCalendarVisible(
+                    false
+                  );
+                },
+            },
+          ]
+        );
+
+        return;
+      }
+
+      setSelectedDate(
+        date
+      );
+
+      setCalendarVisible(
+        false
+      );
+    };
 
   return (
     <ScrollView
@@ -69,145 +217,102 @@ export default function AttendanceScreen() {
         Attendance
       </Text>
 
-      <Text>
-        Periods Today
+      <Button
+        title="📅 Select Date"
+        onPress={() =>
+          setCalendarVisible(
+            true
+          )
+        }
+      />
+
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: "600",
+        }}
+      >
+        Selected Date:
+      </Text>
+
+      <Text
+        style={{
+          fontSize: 18,
+        }}
+      >
+        {selectedDate}
       </Text>
 
       <View
         style={{
-          flexDirection: "row",
-          justifyContent:
-            "space-between",
+          padding: 15,
+          borderWidth: 1,
+          borderRadius: 10,
         }}
       >
-        <Button
-          title="-"
-          onPress={() =>
-            generatePeriods(
-              Math.max(
-                1,
-                periodCount - 1
-              )
-            )
-          }
-        />
-
         <Text
           style={{
-            fontSize: 22,
+            fontSize: 18,
+            fontWeight: "bold",
           }}
         >
-          {periodCount}
+          {isEditing
+            ? "Editing Attendance"
+            : "Creating Attendance"}
         </Text>
 
-        <Button
-          title="+"
-          onPress={() =>
-            generatePeriods(
-              periodCount + 1
-            )
-          }
-        />
+        <Text>
+          {selectedDate}
+        </Text>
       </View>
 
-      {entries.map(
-        (
-          entry,
-          index
-        ) => (
-          <View
-            key={index}
+      <Modal
+        visible={
+          calendarVisible
+        }
+        animationType="slide"
+      >
+        <View
+          style={{
+            flex: 1,
+            paddingTop: 60,
+          }}
+        >
+          <Calendar
+            markedDates={
+              markedDates
+            }
+            onDayPress={(
+              day
+            ) =>
+              handleDateSelect(
+                day.dateString
+              )
+            }
+          />
+
+          <TouchableOpacity
             style={{
-              borderWidth: 1,
-              padding: 15,
-              borderRadius: 10,
+              margin: 20,
             }}
+            onPress={() =>
+              setCalendarVisible(
+                false
+              )
+            }
           >
-            <Text>
-              Period {index + 1}
-            </Text>
-
-            <Picker
-              selectedValue={
-                entry.subjectId
-              }
-              onValueChange={(
-                value
-              ) => {
-                const copy = [
-                  ...entries,
-                ];
-
-                copy[index]
-                  .subjectId =
-                  value;
-
-                setEntries(
-                  copy
-                );
+            <Text
+              style={{
+                textAlign:
+                  "center",
+                fontSize: 18,
               }}
             >
-              <Picker.Item
-                label="Select Subject"
-                value=""
-              />
-
-              {subjects.map(
-                (
-                  subject
-                ) => (
-                  <Picker.Item
-                    key={
-                      subject.id
-                    }
-                    label={
-                      subject.name
-                    }
-                    value={
-                      subject.id
-                    }
-                  />
-                )
-              )}
-            </Picker>
-
-            <Button
-              title={
-                entry.status ===
-                "present"
-                  ? "Present"
-                  : "Absent"
-              }
-              onPress={() => {
-                const copy = [
-                  ...entries,
-                ];
-
-                copy[index]
-                  .status =
-                  entry.status ===
-                  "present"
-                    ? "absent"
-                    : "present";
-
-                setEntries(
-                  copy
-                );
-              }}
-            />
-          </View>
-        )
-      )}
-
-      <Button
-        title="Save Attendance"
-        onPress={() =>
-          Alert.alert(
-            "Next",
-            "Save Logic Next"
-          )
-        }
-      />
+              Close
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
