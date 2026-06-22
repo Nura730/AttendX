@@ -6,7 +6,12 @@ import {
   TextInput,
   Button,
   Alert,
+  Modal,
+  TouchableOpacity,
+  ScrollView,
 } from "react-native";
+
+import { Calendar } from "react-native-calendars";
 
 import { useAuthStore } from "../../store/authStore";
 
@@ -23,6 +28,16 @@ export default function SemesterScreen() {
 
   const [endDate, setEndDate] =
     useState("");
+
+  const [
+    startCalendarVisible,
+    setStartCalendarVisible,
+  ] = useState(false);
+
+  const [
+    endCalendarVisible,
+    setEndCalendarVisible,
+  ] = useState(false);
 
   const user = useAuthStore(
     (state) => state.user
@@ -47,6 +62,17 @@ export default function SemesterScreen() {
         Alert.alert(
           "Error",
           "Fill all fields"
+        );
+        return;
+      }
+
+      if (
+        new Date(endDate) <=
+        new Date(startDate)
+      ) {
+        Alert.alert(
+          "Error",
+          "End date must be after start date"
         );
         return;
       }
@@ -89,57 +115,155 @@ export default function SemesterScreen() {
     };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        padding: 20,
-        justifyContent: "center",
-        gap: 12,
-      }}
-    >
-      <Text
-        style={{
-          fontSize: 28,
-          fontWeight: "bold",
+    <>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: 20,
+          justifyContent:
+            "center",
+          gap: 12,
         }}
       >
-        Semester Setup
-      </Text>
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: "bold",
+          }}
+        >
+          Semester Setup
+        </Text>
 
-      <TextInput
-        placeholder="Semester Name"
-        value={semesterName}
-        onChangeText={setSemesterName}
-        style={{
-          borderWidth: 1,
-          padding: 12,
-        }}
-      />
+        <TextInput
+          placeholder="Semester Name"
+          value={semesterName}
+          onChangeText={
+            setSemesterName
+          }
+          style={{
+            borderWidth: 1,
+            padding: 12,
+            borderRadius: 8,
+          }}
+        />
 
-      <TextInput
-        placeholder="Start Date"
-        value={startDate}
-        onChangeText={setStartDate}
-        style={{
-          borderWidth: 1,
-          padding: 12,
-        }}
-      />
+        <TouchableOpacity
+          onPress={() =>
+            setStartCalendarVisible(
+              true
+            )
+          }
+          style={{
+            borderWidth: 1,
+            padding: 15,
+            borderRadius: 8,
+          }}
+        >
+          <Text>
+            {startDate
+              ? startDate
+              : "Select Start Date"}
+          </Text>
+        </TouchableOpacity>
 
-      <TextInput
-        placeholder="End Date"
-        value={endDate}
-        onChangeText={setEndDate}
-        style={{
-          borderWidth: 1,
-          padding: 12,
-        }}
-      />
+        <TouchableOpacity
+          onPress={() =>
+            setEndCalendarVisible(
+              true
+            )
+          }
+          style={{
+            borderWidth: 1,
+            padding: 15,
+            borderRadius: 8,
+          }}
+        >
+          <Text>
+            {endDate
+              ? endDate
+              : "Select End Date"}
+          </Text>
+        </TouchableOpacity>
 
-      <Button
-        title="Save Semester"
-        onPress={handleSave}
-      />
-    </View>
+        <Button
+          title="Save Semester"
+          onPress={handleSave}
+        />
+      </ScrollView>
+
+      <Modal
+        visible={
+          startCalendarVisible
+        }
+        animationType="slide"
+      >
+        <View
+          style={{
+            flex: 1,
+            paddingTop: 60,
+          }}
+        >
+          <Calendar
+            onDayPress={(
+              day
+            ) => {
+              setStartDate(
+                day.dateString
+              );
+
+              setStartCalendarVisible(
+                false
+              );
+            }}
+          />
+
+          <Button
+            title="Close"
+            onPress={() =>
+              setStartCalendarVisible(
+                false
+              )
+            }
+          />
+        </View>
+      </Modal>
+
+      <Modal
+        visible={
+          endCalendarVisible
+        }
+        animationType="slide"
+      >
+        <View
+          style={{
+            flex: 1,
+            paddingTop: 60,
+          }}
+        >
+          <Calendar
+            onDayPress={(
+              day
+            ) => {
+              setEndDate(
+                day.dateString
+              );
+
+              setEndCalendarVisible(
+                false
+              );
+            }}
+          />
+
+          <Button
+            title="Close"
+            onPress={() =>
+              setEndCalendarVisible(
+                false
+              )
+            }
+          />
+        </View>
+      </Modal>
+    </>
   );
 }

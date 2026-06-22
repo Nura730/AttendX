@@ -14,6 +14,8 @@ import { Semester } from "../types/semester";
 interface SemesterState {
   semester: Semester | null;
 
+  semesters: Semester[];
+
   loading: boolean;
 
   createSemester: (
@@ -21,7 +23,16 @@ interface SemesterState {
     uid: string
   ) => Promise<void>;
 
+  createNewSemester: (
+    semester: Semester,
+    uid: string
+  ) => Promise<void>;
+
   loadSemester: (
+    uid: string
+  ) => Promise<void>;
+
+  loadAllSemesters: (
     uid: string
   ) => Promise<void>;
 
@@ -39,6 +50,8 @@ interface SemesterState {
 export const useSemesterStore =
   create<SemesterState>((set, get) => ({
     semester: null,
+
+    semesters: [],
 
     loading: false,
 
@@ -68,6 +81,47 @@ export const useSemesterStore =
           loading: false,
         });
       }
+    },
+
+    createNewSemester: async (
+      semester,
+      uid
+    ) => {
+      const currentSemester =
+        get().semester;
+
+      if (currentSemester) {
+        const inactiveSemester = {
+          ...currentSemester,
+          isActive: false,
+        };
+
+        await setDoc(
+          doc(
+            db,
+            "users",
+            uid,
+            "semesters",
+            currentSemester.id
+          ),
+          inactiveSemester
+        );
+      }
+
+      await setDoc(
+        doc(
+          db,
+          "users",
+          uid,
+          "semesters",
+          semester.id
+        ),
+        semester
+      );
+
+      set({
+        semester,
+      });
     },
 
     loadSemester: async (
@@ -101,12 +155,38 @@ export const useSemesterStore =
         set({
           semester:
             activeSemester || null,
+
+          semesters,
         });
       } finally {
         set({
           loading: false,
         });
       }
+    },
+
+    loadAllSemesters: async (
+      uid
+    ) => {
+      const snapshot =
+        await getDocs(
+          collection(
+            db,
+            "users",
+            uid,
+            "semesters"
+          )
+        );
+
+      const semesters =
+        snapshot.docs.map(
+          (doc) =>
+            doc.data() as Semester
+        );
+
+      set({
+        semesters,
+      });
     },
 
     completeSetup: async (
