@@ -4,8 +4,6 @@ import {
   View,
   Text,
   ScrollView,
-  Button,
-  Alert,
 } from "react-native";
 
 import { useSubjectStore } from "../../store/subjectStore";
@@ -33,12 +31,56 @@ export default function DashboardScreen() {
 
   const overallAttendance =
     totalConducted === 0
-      ? 0
+      ? "0"
       : (
           (totalAttended /
             totalConducted) *
           100
         ).toFixed(1);
+
+  const calculateNeedToAttend =
+    (
+      attended: number,
+      total: number,
+      target: number
+    ) => {
+      let x = 0;
+
+      while (
+        ((attended + x) /
+          (total + x)) *
+          100 <
+        target
+      ) {
+        x++;
+      }
+
+      return x;
+    };
+
+  const calculateCanMiss =
+    (
+      attended: number,
+      total: number,
+      target: number
+    ) => {
+      let x = 0;
+
+      while (
+        total + x > 0 &&
+        (attended /
+          (total + x)) *
+          100 >=
+          target
+      ) {
+        x++;
+      }
+
+      return Math.max(
+        0,
+        x - 1
+      );
+    };
 
   return (
     <ScrollView
@@ -50,7 +92,7 @@ export default function DashboardScreen() {
       <View
         style={{
           borderWidth: 1,
-          borderRadius: 12,
+          borderRadius: 15,
           padding: 20,
         }}
       >
@@ -65,74 +107,92 @@ export default function DashboardScreen() {
 
         <Text
           style={{
-            fontSize: 32,
+            fontSize: 36,
             fontWeight: "bold",
+            marginTop: 10,
           }}
         >
           {overallAttendance}%
         </Text>
 
         <Text>
-          {totalAttended} / {totalConducted}
+          {totalAttended} /{" "}
+          {totalConducted}
         </Text>
       </View>
 
-      <Button
-        title="Mark Today's Attendance"
-        onPress={() =>
-          Alert.alert(
-            "Next",
-            "Attendance Screen"
-          )
-        }
-      />
-
-      <Button
-        title="Attendance History"
-        onPress={() =>
-          Alert.alert(
-            "Next",
-            "History Screen"
-          )
-        }
-      />
-
       <Text
         style={{
-          fontSize: 22,
+          fontSize: 24,
           fontWeight: "bold",
         }}
       >
-        Subjects
+        Subject Analytics
       </Text>
 
       {subjects.map(
         (subject) => {
           const percentage =
-            subject.totalPeriods === 0
+            subject.totalPeriods ===
+            0
               ? 0
-              : (
-                  (subject.attendedPeriods /
-                    subject.totalPeriods) *
-                  100
-                ).toFixed(1);
+              : Number(
+                  (
+                    (subject.attendedPeriods /
+                      subject.totalPeriods) *
+                    100
+                  ).toFixed(1)
+                );
+
+          const safe =
+            percentage >=
+            subject.targetAttendance;
+
+          const canMiss =
+            calculateCanMiss(
+              subject.attendedPeriods,
+              subject.totalPeriods,
+              subject.targetAttendance
+            );
+
+          const needToAttend =
+            calculateNeedToAttend(
+              subject.attendedPeriods,
+              subject.totalPeriods,
+              subject.targetAttendance
+            );
 
           return (
             <View
               key={subject.id}
               style={{
                 borderWidth: 1,
+                borderRadius: 12,
                 padding: 15,
-                borderRadius: 10,
               }}
             >
               <Text
                 style={{
+                  fontSize: 20,
                   fontWeight: "bold",
-                  fontSize: 18,
                 }}
               >
                 {subject.name}
+              </Text>
+
+              <Text>
+                Attendance:
+                {" "}
+                {percentage}%
+              </Text>
+
+              <Text>
+                Target:
+                {" "}
+                {
+                  subject.targetAttendance
+                }
+                %
               </Text>
 
               <Text>
@@ -151,20 +211,39 @@ export default function DashboardScreen() {
                 }
               </Text>
 
-              <Text>
-                Attendance:
-                {" "}
-                {percentage}%
-              </Text>
+              {safe ? (
+                <>
+                  <Text>
+                    Status:
+                    {" "}
+                    ✅ Safe
+                  </Text>
 
-              <Text>
-                Target:
-                {" "}
-                {
-                  subject.targetAttendance
-                }
-                %
-              </Text>
+                  <Text>
+                    Can Miss:
+                    {" "}
+                    {canMiss}
+                    {" "}
+                    classes
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text>
+                    Status:
+                    {" "}
+                    ⚠️ At Risk
+                  </Text>
+
+                  <Text>
+                    Need To Attend:
+                    {" "}
+                    {needToAttend}
+                    {" "}
+                    classes
+                  </Text>
+                </>
+              )}
             </View>
           );
         }
