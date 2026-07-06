@@ -4,9 +4,14 @@ export interface Semester {
   semesterName: string;
 
   startDate: string;
+
   endDate: string;
 
-  plannedPeriods: number;
-
   conductedPeriods: number;
+
+  isActive: boolean;
+
+  setupCompleted: boolean;
+
+  createdAt: string;
 }

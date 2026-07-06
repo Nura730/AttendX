@@ -7,11 +7,15 @@ export interface Subject {
 
   name: string;
 
-  type: SubjectType;
+  code?: string;
 
-  presentCount: number;
+  totalPeriods: number;
 
-  absentCount: number;
+  attendedPeriods: number;
 
-  conductedCount: number;
+  targetAttendance: number;
+
+  isActive: boolean;
+
+  createdAt: string;
 }
